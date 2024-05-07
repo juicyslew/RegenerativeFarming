@@ -1,0 +1,32 @@
+{
+  "Name": "Regenerative Agriculture",
+  "Author": "Juicyslew",
+  "Version": "0.0.1",
+  "Description": "Adds a soil health game mechanic.",
+  "UniqueID": "Juicyslew.RegenerativeAgriculture",
+  "EntryDll": "RegenerativeAgriculture.dll",
+  "MinimumApiVersion": "4.0.8",
+  "UpdateKeys": [],
+  "Dependencies": [
+    {
+      "UniqueID": "Cornucopia.MoreCrops",
+      "IsRequired": true
+    },
+    {
+      "UniqueID": "Cornucopia.MoreFlowers",
+      "IsRequired": true
+    },
+    {
+      "UniqueID": "Cornucopia.GrowableForage",
+      "IsRequired": true
+    },
+    {
+      "UniqueID": "spacechase0.SpaceCore",
+      "IsRequired": true
+    },
+    {
+      "UniqueID": "furyx639.CustomBush",
+      "IsRequired": true
+    }
+  ]
+}
