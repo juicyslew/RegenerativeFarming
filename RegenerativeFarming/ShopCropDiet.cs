@@ -53,7 +53,8 @@ namespace RegenerativeAgriculture
                     int width = Math.Max(title.Length * 22, 22*12);
                     int xPosition = menu.xPositionOnScreen + 230 - width;
                     int yPosition = menu.yPositionOnScreen + 548;
-                    Drawer.DrawInfoBox(Game1.spriteBatch, shared_data.measure_colors, xPosition, yPosition, crop_diet, title, width);
+                    bool has_radius_effect = ItemRegistry.GetData(hoverItem.QualifiedItemId).ObjectType == "Basic";
+                    Drawer.DrawInfoBox(Game1.spriteBatch, shared_data.measure_colors, xPosition, yPosition, crop_diet, title, is_diet: true, width: width, radius: has_radius_effect ? 1 : 0);
                 }
             }
         }

@@ -257,7 +257,7 @@
   "(O)Cornucopia_DragonFruitSapling": [ 0, -24, -24, 12 ], // Tree, Convert c5000 => 4000
   "(O)Cornucopia_DurianSapling": [ 0, 36, 24, 12 ], // Tree, Cash 350 => 400
   "(O)Cornucopia_LycheeSapling": [ 0, -25, -12, 0 ], // Tree, Cover c5000 => 2000, 110 => 60
-  "(O)Cornucopia_NectarineSapling": [ 50, -50, 0, 0 ], // Tree, Convert c6000 => 3000, 140 => 90
+  "(O)Cornucopia_NectarineSapling": [ 32, -32, 0, 0 ], // Tree, Convert c6000 => 3000, 140 => 90
   "(O)Cornucopia_PapayaSapling": [ 0, 15, 0, 0 ], // Tree, Chill Cash, 135 => 70
   "(O)Cornucopia_PlantainSapling": [ 25, 0, 25, 0 ], // Tree, Cash 175 => 260
   "(O)Cornucopia_UmeSapling": [ -40, 0, 0, 0 ], // Tree, Cover 50 => 30, c2000 => 1500

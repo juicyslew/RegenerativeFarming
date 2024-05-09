@@ -32,6 +32,8 @@ using StardewValley.GameData.Locations;
 using xTile.Layers;
 using Force.DeepCloner;
 using StardewMods.CustomBush;
+using StardewValley.GameData.Crops;
+using static HarmonyLib.Code;
 
 namespace RegenerativeAgriculture
 {
@@ -121,7 +123,9 @@ namespace RegenerativeAgriculture
         SharedData? shared_data;
         ShopCropDiet shop_crop_diet_ui;
         public Texture2D health_icons;
-
+        public Texture2D aoe_icons;
+        public Texture2D caution_icons;
+        public Texture2D health_bars;
 
         /*********
         ** Public methods
@@ -148,7 +152,13 @@ namespace RegenerativeAgriculture
 
             shared_data = SharedData.GetInstance();
 
-            health_icons = helper.GameContent.Load<Texture2D>($"{ModManifest.UniqueID}/soil_measure_icons.png");
+            health_icons = helper.GameContent.Load<Texture2D>($"{ModManifest.UniqueID}/2x_soil_measure_icons.png");
+            aoe_icons = helper.GameContent.Load<Texture2D>($"{ModManifest.UniqueID}/radius_icons_no_support_lines.png");
+            caution_icons = helper.GameContent.Load<Texture2D>($"{ModManifest.UniqueID}/caution_icons.png");
+            // Try to use this for determining when held item is crop
+            //crop_data = helper.GameContent.Load<string, string>("Data/Crops");
+            //fruitTree_data = helper.GameContent.Load<string, string>("Data/"???);
+
 
             // Soil Surveyor Setup
             SoilSurveyorDataDefinition def = new();
@@ -225,9 +235,16 @@ namespace RegenerativeAgriculture
                     var data = asset.AsDictionary<string, ObjectData>().Data;
                     int i = 0;
                 });
-            }else if (e.NameWithoutLocale.IsEquivalentTo($"{ModManifest.UniqueID}/soil_measure_icons.png"))
+            }else if (e.NameWithoutLocale.IsEquivalentTo($"{ModManifest.UniqueID}/2x_soil_measure_icons.png"))
             {
-                e.LoadFromModFile<Texture2D>("assets/soil_measure_icons.png", StardewModdingAPI.Events.AssetLoadPriority.Low);
+                e.LoadFromModFile<Texture2D>("assets/2x_soil_measure_icons.png", StardewModdingAPI.Events.AssetLoadPriority.Low);
+            }else if (e.NameWithoutLocale.IsEquivalentTo($"{ModManifest.UniqueID}/radius_icons_no_support_lines.png"))
+            {
+                e.LoadFromModFile<Texture2D>("assets/radius_icons_no_support_lines.png", StardewModdingAPI.Events.AssetLoadPriority.Low);
+            }
+            else if (e.NameWithoutLocale.IsEquivalentTo($"{ModManifest.UniqueID}/caution_icons.png"))
+            {
+                e.LoadFromModFile<Texture2D>("assets/caution_icons.png", StardewModdingAPI.Events.AssetLoadPriority.Low);
             }
             //else if (e.NameWithoutLocale.IsEquivalentTo("Data/Shops"))
             //{
@@ -393,36 +410,47 @@ namespace RegenerativeAgriculture
                     DisableOverlay();
                 }
 
+                int[]? held_diet = null;
                 if (holding_seed)
                 {
                     // Show crop diet in top left corner.
                     int xPosition = 10;
                     int yPosition = 10;
-                    int[] crop_diet = shared_data.GetCropDiet(held_item.QualifiedItemId);
+                    held_diet = shared_data.GetCropDiet(held_item.QualifiedItemId);
+                    bool has_radius_effect = ItemRegistry.GetData(held_item.QualifiedItemId).ObjectType == "Basic";
                     string title = $"{held_item.DisplayName} Diet";
-                    Drawer.DrawInfoBox(e.SpriteBatch, shared_data.measure_colors, xPosition, yPosition, crop_diet, title, Math.Max(title.Length * 22, 12 * 22));
+                    Drawer.DrawInfoBox(e.SpriteBatch, shared_data.measure_colors, xPosition, yPosition, held_diet, title, is_diet: true, width: Math.Max(title.Length * 22, 12 * 22), radius: has_radius_effect ? 1 : 0);
                 }
 
                 
                 if ((holding_seed || holding_surveyor || holding_hoe) && shared_data.soil_health_data.ContainsKey(current_location))
                 {
-                    bool double_ui_flag = false;
                     // Soil Surveyor UI (On holding Hoe / Seed / Surveyor, and mousing over surveyed tile)
-                    double_ui_flag = true;
+                    bool double_ui_flag = true;
                     int[]? soil_health = null;
+                    int[]? next_soil_health_unclamped = null;
                     if (shared_data.surveyed_tiles[current_location].Contains(Game1.currentCursorTile))
                     {
                         soil_health = shared_data.GetSoilHealth(Game1.currentLocation, Game1.currentCursorTile);
+                        if (held_diet is not null)
+                        {
+                            next_soil_health_unclamped = new int[4];
+                            for (int i = 0; i < 4; i++)
+                            {
+                                // Clamped at -1 so that I can still know if we should show Danger ui in the drawing function.
+                                next_soil_health_unclamped[i] = Math.Min(Math.Max(soil_health[i] - held_diet[i], -1), SharedData.max_health);
+                            }
+                        }
                     }
 
 
                     string title = "Soil Health";
-                    int health_box_width = Math.Max(title.Length * 22, 12 * 22);
-                    int health_box_height = 100; // Thsis is wrong, but the correct value doesn't look right.
+                    int health_box_width = Math.Max(title.Length * 22, 13 * 22);
+                    int health_box_height = 180;
                     Vector2 mouse_world_coordinates = Game1.currentViewportTarget + Game1.getMousePosition().ToVector2();
                     int xPosition = mouse_world_coordinates.X < Game1.getPlayerOrEventFarmer().StandingPixel.X ? Game1.getMouseX() - health_box_width - 32 : Game1.getMouseX() + 32;
                     int yPosition = mouse_world_coordinates.Y < Game1.getPlayerOrEventFarmer().StandingPixel.Y ? Game1.getMouseY() - health_box_height - 32 : Game1.getMouseY() + 32;
-                    Drawer.DrawInfoBox(e.SpriteBatch, shared_data.measure_colors, xPosition, yPosition, soil_health, title, health_box_width);
+                    Drawer.DrawInfoBox(e.SpriteBatch, shared_data.measure_colors, xPosition, yPosition, soil_health, title, width: health_box_width, next_health_data: next_soil_health_unclamped);
                     // Moused Over Crop Diet UI (For seeing the diet of the crop you're looking at currently!)
                     if (current_location.terrainFeatures.ContainsKey(Game1.currentCursorTile))
                     {
@@ -443,7 +471,7 @@ namespace RegenerativeAgriculture
                         else if (t is HoeDirt hoe_dirt && hoe_dirt.crop != null)
                         {
                             crop_id = $"(O){hoe_dirt.crop.netSeedIndex.Value}";
-                            eating = shared_data.IsCropEating(hoe_dirt);
+                            eating = shared_data.IsCropEating(hoe_dirt) == EatMode.OnlyTake;
                         }
                         else if (t is Bush bush)
                         {
@@ -464,7 +492,7 @@ namespace RegenerativeAgriculture
                                     crop_id = "(O)251";
                                 }
                             }
-                            eating = shared_data.IsBushEating(bush, customBush);
+                            eating = shared_data.IsBushEating(bush);
                         }
 
 
@@ -477,22 +505,19 @@ namespace RegenerativeAgriculture
 
                         if (crop_id is not null)
                         {
-                            this.Monitor.Log($"Mouse is on: {crop_id}", LogLevel.Debug);
                             string crop_name = ItemRegistry.GetData(crop_id).DisplayName;
                             int[] crop_diet = shared_data.GetCropDiet(crop_id);
                             string diet_title = $"{crop_name} Diet";
 
                             // Only one of these can be true at a time.
-                            string death_text = (chance_of_death <= 0) ? "" : $"{chance_of_death}% | ";
-                            string out_of_season = eating ? "Active" : "Dormant";
-                            string extra_text = death_text + out_of_season;
-                            int diet_box_width = Math.Max(diet_title.Length * 22, (extra_text.Length + 12) * 22);
-                            int diet_box_height = 100;
+                            string death_text = (chance_of_death <= 0) ? "" : "Dying!";
+                            int diet_box_width = Math.Max(diet_title.Length * 22, (death_text.Length + 12) * 22);
+                            int diet_box_height = 180;
                             xPosition = mouse_world_coordinates.X < Game1.getPlayerOrEventFarmer().StandingPixel.X ? Game1.getMouseX() - diet_box_width - 32 : Game1.getMouseX() + 32;
                             int yExtraOffset = double_ui_flag ? diet_box_height : 0;
                             yPosition = mouse_world_coordinates.Y < Game1.getPlayerOrEventFarmer().StandingPixel.Y ? Game1.getMouseY() - diet_box_height - 32 - yExtraOffset : Game1.getMouseY() + 32 + yExtraOffset;
 
-                            Drawer.DrawInfoBox(e.SpriteBatch, shared_data.measure_colors, xPosition, yPosition, crop_diet, diet_title, diet_box_width, extra_text: extra_text);
+                            Drawer.DrawInfoBox(e.SpriteBatch, shared_data.measure_colors, xPosition, yPosition, crop_diet, diet_title, is_diet: true, width: diet_box_width, extra_text: death_text);
                         }
                     }
                 }
@@ -562,14 +587,14 @@ namespace RegenerativeAgriculture
 
     static class Drawer
     {
-        public static void DrawInfoBox(SpriteBatch sprite_batch, Color[] measure_colors, int xPosition, int yPosition, int[]? health_data, string titleToRender, int width = 320, string extra_text = null)
+        public static void DrawInfoBox(SpriteBatch sprite_batch, Color[] measure_colors, int xPosition, int yPosition, int[]? health_data, string titleToRender, bool is_diet = false, int width = 320, string extra_text = null, int[]? next_health_data = null, int radius = 0)
         {
             // Make 0,0 the top left corner
-            IClickableMenu.drawTextureBox(Game1.spriteBatch, xPosition, yPosition, width, 108, Color.White);
+            IClickableMenu.drawTextureBox(Game1.spriteBatch, xPosition, yPosition, width, 180, Color.White);
             sprite_batch.DrawString(Game1.dialogueFont, titleToRender, new Vector2(xPosition + 20, yPosition + 14), Color.Black * 0.2f);
             sprite_batch.DrawString(Game1.dialogueFont, titleToRender, new Vector2(xPosition + 22, yPosition + 16), Color.Black * 0.8f);
-            xPosition += 30;
-            yPosition += 56;
+            xPosition += 25;
+            yPosition += 60;
             // sprite_batch.Draw(Game1.mouseCursors, new Vector2(xPosition, yPosition), new Rectangle(60, 428, 10, 10), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0.85f);
             // sprite_batch.Draw(Game1.debrisSpriteSheet, new Vector2(xPosition + 32, yPosition + 10), Game1.getSourceRectForStandardTileSheet(Game1.debrisSpriteSheet, 8, 16, 16), Color.White, 0f, new Vector2(8f, 8f), 5f, SpriteEffects.None, 0.95f);
             if (health_data is null)
@@ -580,7 +605,8 @@ namespace RegenerativeAgriculture
                     string text = "??";
                     sprite_batch.DrawString(Game1.dialogueFont, text, new Vector2(xPosition, yPosition + 6), text_color * 0.2f);
                     sprite_batch.DrawString(Game1.dialogueFont, text, new Vector2(xPosition + 2, yPosition + 4), text_color * 1.0f);
-                    xPosition += (22 * text.Length) + 10;
+                    xPosition += (22 * text.Length) + 8;
+                    //yPosition += 28;
                 }
             }
             else
@@ -588,59 +614,108 @@ namespace RegenerativeAgriculture
                 for (int i = 0; i < 4; i++)
                 {
                     Color text_color = measure_colors[i];
-                    DrawMeasureIcons(sprite_batch, text_color, xPosition, yPosition, health_data[i], i);
-                    xPosition += 80;
-                }
-            }
+                    if (next_health_data is not null && next_health_data[i] < health_data[i])
+                    {
+                        // Draw the preview (but only for taking... figure out what giving looks like at some point.)
+                        DrawMeasureIcons(sprite_batch, text_color, xPosition, yPosition + 26 * i, health_data[i], i, true);
+                        if (next_health_data[i] <= -1)
+                        {
+                            // Display Danger Icon
+                            sprite_batch.Draw(
+                                ModEntry.instance.caution_icons,
+                                new Vector2(xPosition + 216, yPosition + 26 * i),
+                                new Rectangle(16, 0, 16, 16),
+                                Color.White,
+                                0f,
+                                Vector2.Zero,
+                                1.5f,
+                                SpriteEffects.None,
+                                0.85f
+                            );
+                        }
+                        else
+                        {
+                            DrawMeasureIcons(sprite_batch, text_color, xPosition, yPosition + 26 * i, next_health_data[i], i, is_diet);
+                        }
 
-            if (extra_text is not null)
-            {
-                xPosition += 22; //Added offset in addition to normal one.
-                string text = extra_text;
-                sprite_batch.DrawString(Game1.dialogueFont, text, new Vector2(xPosition, yPosition + 6), Color.Black * 0.2f);
-                sprite_batch.DrawString(Game1.dialogueFont, text, new Vector2(xPosition + 2, yPosition + 4), Color.Black * 1.0f);
+                    }
+                    else
+                    {
+                        // Just draw so
+                        DrawMeasureIcons(sprite_batch, text_color, xPosition, yPosition + 26 * i, health_data[i], i, is_diet);
+                    }
+                }
+                if (is_diet && radius > 0)
+                {
+
+                    int spr_width;
+                    int spr_height;
+                    int spr_x;
+                    int spr_y;
+                    if (radius == 1)
+                    {
+                        spr_width = 48;
+                        spr_height = 48;
+                        spr_x = 0;
+                        spr_y = 0;
+                    }
+                    else
+                    {
+                        // Radius == 2
+                        spr_width = 80;
+                        spr_height = 80;
+                        spr_x = 48;
+                        spr_y = 0;
+                    }
+                    sprite_batch.Draw(
+                        ModEntry.instance.aoe_icons,
+                        new Vector2(xPosition + 234, yPosition),
+                        new Rectangle(spr_x, spr_y, spr_width, spr_height),
+                        Color.Blue * .5f,
+                        0f,
+                        Vector2.Zero,
+                        2f,
+                        SpriteEffects.None,
+                        0.85f
+                    );
+                }
             }
         }
 
-        public static void DrawMeasureIcons(SpriteBatch sprite_batch, Color color, int xpos, int ypos, int amount, int measure)
+        public static void DrawMeasureIcons(SpriteBatch sprite_batch, Color color, int xpos, int ypos, int amount, int measure, bool is_diet)
         {
             // Render in 4x2 square, Eventually Center align it too.
             bool negative = false;
-            if (amount < 0)
+            if (amount < 0 || !is_diet)
             {
                 negative = true;
             }
             amount = Math.Abs(amount);
 
             int xind = 0;
-            int yind = 0;
-            int spr_width = 16;
-            int spr_height = 16;
+            int spr_width = 32;
+            int spr_height = 32;
             int spr_indx;
             int spr_indy;
+            float scale = .75f;
             while (amount > 4)
             {
                 // Get correct tilesheet point and draw it based on measure and negative (amount is 4 in all of these cases)
 
-                spr_indx = negative ? 7 : 6;
+                spr_indx = negative ? 6 : 7;
                 spr_indy = measure;
                 sprite_batch.Draw(
                     ModEntry.instance.health_icons,
-                    new Vector2(xpos + xind * 18, ypos + yind * 18),
-                    new Rectangle(spr_width * spr_indx , spr_height * spr_indy, 16, 16),
+                    new Vector2(xpos + xind * 26, ypos),
+                    new Rectangle(spr_width * spr_indx , spr_height * spr_indy, spr_width, spr_height),
                     color * .8f,
                     0f,
                     Vector2.Zero,
-                    1f,
+                    scale,
                     SpriteEffects.None,
                     0.85f
                 );
                 xind++;
-                if (xind == 4)
-                {
-                    xind = 0;
-                    yind++;
-                }
                 amount -= 4;
             }
 
@@ -649,16 +724,74 @@ namespace RegenerativeAgriculture
             {
                 return;
             }
-            spr_indx = (amount-1) * 2 + (negative ? 1 : 0);
+            spr_indx = (amount-1) * 2 + (negative ? 0 : 1);
             spr_indy = measure;
             sprite_batch.Draw(
                 ModEntry.instance.health_icons,
-                new Vector2(xpos + xind * 18, ypos + yind * 18),
-                new Rectangle(spr_width * spr_indx, spr_height * spr_indy, 16, 16),
+                new Vector2(xpos + xind * 26, ypos),
+                new Rectangle(spr_width * spr_indx, spr_height * spr_indy, spr_width, spr_height),
                 color * .8f,
                 0f,
                 Vector2.Zero,
-                1f,
+                scale,
+                SpriteEffects.None,
+                0.85f
+            );
+        }
+
+        public static void DrawMeasureBars(SpriteBatch sprite_batch, Color color, int xpos, int ypos, int amount, int measure, bool is_diet)
+        {
+            throw new NotImplementedException();
+            // Render in 4x2 square, Eventually Center align it too.
+            bool negative = false;
+            if (amount < 0 || !is_diet)
+            {
+                negative = true;
+            }
+            amount = Math.Abs(amount);
+
+            int xind = 0;
+            int spr_width = 32;
+            int spr_height = 32;
+            int spr_indx;
+            int spr_indy;
+            float scale = .75f;
+            while (amount > 4)
+            {
+                // Get correct tilesheet point and draw it based on measure and negative (amount is 4 in all of these cases)
+
+                spr_indx = negative ? 6 : 7;
+                spr_indy = measure;
+                sprite_batch.Draw(
+                    ModEntry.instance.health_icons,
+                    new Vector2(xpos + xind * 26, ypos),
+                    new Rectangle(spr_width * spr_indx, spr_height * spr_indy, spr_width, spr_height),
+                    color * .8f,
+                    0f,
+                    Vector2.Zero,
+                    scale,
+                    SpriteEffects.None,
+                    0.85f
+                );
+                xind++;
+                amount -= 4;
+            }
+
+            // Get correct tilesheet point and draw it based on amount, measure, and negative
+            if (amount == 0)
+            {
+                return;
+            }
+            spr_indx = (amount - 1) * 2 + (negative ? 0 : 1);
+            spr_indy = measure;
+            sprite_batch.Draw(
+                ModEntry.instance.health_icons,
+                new Vector2(xpos + xind * 26, ypos),
+                new Rectangle(spr_width * spr_indx, spr_height * spr_indy, spr_width, spr_height),
+                color * .8f,
+                0f,
+                Vector2.Zero,
+                scale,
                 SpriteEffects.None,
                 0.85f
             );

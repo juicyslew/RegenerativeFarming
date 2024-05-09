@@ -10,6 +10,7 @@ using StardewValley.TerrainFeatures;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json;
@@ -24,15 +25,16 @@ namespace RegenerativeAgriculture
     {
         All,
         OnlyTake,
-        OnlyGive
+        OnlyGive,
+        None
     }
     internal sealed class SharedData
     {
         //static field with the data type of its own class
         private static SharedData instance;
         private ModEntry mod_entry;
-        public const int max_health = 40;
-        public static int[] max_initial_health = new int[] {24, 16, 12, 9 };
+        public const int max_health = 32;
+        public static int[] max_initial_health = new int[] {20, 14, 10, 8 };
         public const float death_chance_per_missing_nutrient = .05f;
 
         public Color[] measure_colors;
@@ -193,7 +195,6 @@ namespace RegenerativeAgriculture
             if (!soil_health_data.ContainsKey(location))
             {
                 // In case special plants allow to grow outside of a farmable location.
-                mod_entry.Monitor.Log("GOT HERE.", LogLevel.Debug);
                 return new int[] { 1000, 1000, 1000, 1000 };
             }
             return soil_health_data[location][tile].DeepClone();
@@ -241,19 +242,19 @@ namespace RegenerativeAgriculture
 
             // Remove irrelevant features.
             t_features = t_features.Where(x =>
-                (x is Tree tree && !tree.hasSeed.Value && !tree.stump.Value) ||
-                (x is FruitTree fruitTree && !fruitTree.stump.Value && (fruitTree.growthStage.Value != 4 || fruitTree.IsInSeasonHere())) ||
-                x is Bush ||
-                (x is HoeDirt hoeDirt && hoeDirt.crop != null));
+                (x is Tree tree && IsTreeEating(tree)) ||
+                (x is FruitTree fruitTree && IsFruitTreeEating(fruitTree)) ||
+                (x is Bush bush && IsBushEating(bush)) ||
+                (x is HoeDirt hoeDirt && IsCropEating(hoeDirt) != EatMode.None));
 
             // Sort so that Trees are first, then bushes, then crops
             t_features = t_features.OrderBy(x => (x is Tree || x is FruitTree) ? 0 : (x is Bush) ? 1 : 2);
 
             // Calculate Regenerative effects
-            Compute_Tomorrow_inplace(data_store, t_features, EatMode.OnlyGive);
+            ComputeDietEffects(data_store, t_features, EatMode.OnlyGive);
 
             // Calculate Depletive effects
-            Compute_Tomorrow_inplace(data_store, t_features, EatMode.OnlyTake);
+            ComputeDietEffects(data_store, t_features, EatMode.OnlyTake);
 
             // Kill Doomed Plants
             KillDoomedPlants(data_store, t_features);
@@ -275,59 +276,111 @@ namespace RegenerativeAgriculture
             // Get Terrain Features
             IEnumerable<TerrainFeature> t_features = location.terrainFeatures.Values;
 
+
+            int days_until_monday = (28 - Game1.dayOfMonth) % 7 + 1;
+
             // Remove irrelevant features.
             t_features = t_features.Where(x =>
-                (x is Tree tree && !tree.hasSeed.Value && !tree.stump.Value) ||
-                (x is FruitTree fruitTree && !fruitTree.stump.Value && (fruitTree.growthStage.Value != 4 || fruitTree.IsInSeasonHere())) ||
-                x is Bush ||
-                (x is HoeDirt hoeDirt && hoeDirt.crop != null));
+                (x is Tree tree && IsTreeEating(tree, days_until_monday)) ||
+                (x is FruitTree fruitTree && IsFruitTreeEating(fruitTree, days_until_monday)) ||
+                (x is Bush bush && IsBushEating(bush, days_until_monday))||
+                (x is HoeDirt hoeDirt && IsCropEating(hoeDirt, days_until_monday) != EatMode.None));
 
             // Sort so that Trees are first, then bushes, then crops
             t_features = t_features.OrderBy(x => (x is Tree || x is FruitTree) ? 0 : (x is Bush) ? 1 : 2);
-
             // Calculate Regenerative effects
-            Compute_Tomorrow_inplace(data_store, t_features, EatMode.OnlyGive);
+            ComputeDietEffects(data_store, t_features, EatMode.OnlyGive, check_days: days_until_monday);
 
             // Calculate Depletive effects
-            Compute_Tomorrow_inplace(data_store, t_features, EatMode.OnlyTake);
+            ComputeDietEffects(data_store, t_features, EatMode.OnlyTake, check_days: days_until_monday);
 
             // Generate the death preview!
-            GenerateDeathPreview(data_store, t_features);
+            SetDeathPreview(data_store, t_features);
         }
 
-        public bool IsTreeEating(Tree tree)
+        public bool IsTreeEating(Tree tree, int check_days = 1)
         {
-            return !tree.stump.Value;
+            int indexOfMonth = Game1.dayOfMonth - 1;
+            return !tree.stump.Value && indexOfMonth / 7 != (indexOfMonth + check_days) / 7; ;
         }
 
-        public bool IsFruitTreeEating(FruitTree fruitTree)
+        public bool IsFruitTreeEating(FruitTree fruitTree, int check_days = 1)
         {
-            return !fruitTree.stump.Value && (fruitTree.growthStage.Value != 4 || fruitTree.IsInSeasonHere());
+
+            int indexOfMonth = Game1.dayOfMonth - 1;
+            return !fruitTree.stump.Value && indexOfMonth / 7 != (indexOfMonth + check_days) / 7; // && (fruitTree.growthStage.Value != 4 || fruitTree.IsInSeasonHere());
         }
 
-        public bool IsBushEating(Bush bush, ICustomBush? customBush)
+        public bool IsBushEating(Bush bush, int check_days = 1)
         {
             // This checks if the bush is currently growing or in season or sheltered.
-            Season season = Game1.season;
-            int dayOfMonth = Game1.dayOfMonth;
-            List<Season> allowed_season = customBush?.Seasons ?? new List<Season> { Season.Spring, Season.Summer, Season.Fall };
-            return bush.getAge() < (customBush?.AgeToProduce ?? 20) || (allowed_season.Contains(season) || bush.IsSheltered());
+            // Integer division to determine if these two days are not in the same week.
+            int indexOfMonth = Game1.dayOfMonth - 1;
+            return indexOfMonth / 7 != (indexOfMonth + check_days) / 7;
+            //Season season = Game1.season;
+            //int dayOfMonth = Game1.dayOfMonth;
+            //List<Season> allowed_season = customBush?.Seasons ?? new List<Season> { Season.Spring, Season.Summer, Season.Fall };
+            //return bush.getAge() < (customBush?.AgeToProduce ?? 20) || (allowed_season.Contains(season) || bush.IsSheltered());
         }
 
-        public bool IsCropEating(HoeDirt hoeDirt, bool ignore_watering = false)
+        public EatMode IsCropEating(HoeDirt hoeDirt, int check_days = 1)
         {
-            return !(hoeDirt.crop == null || (!ignore_watering && hoeDirt.needsWatering() && !hoeDirt.isWatered()) || hoeDirt.readyForHarvest());
+            Crop crop = hoeDirt.crop;
+            bool taking = false;
+            bool giving = false;
+            if (crop is not null)
+            {
+                bool crop_just_planted = crop.currentPhase.Value == 0 && crop.dayOfCurrentPhase.Value == 0;
+                if (crop_just_planted)
+                {
+                    taking = true;
+                }
+                // Detect when we'll become fully grown just before it actually happens.
+                if (!crop.fullyGrown.Value)
+                {
+                    // Logic copied from Crop.newDay() function in base game code.
+                    int dayOfCurrentPhase = crop.dayOfCurrentPhase.Value;
+                    int currentPhase = crop.currentPhase.Value;
+
+                    for (int i = 0; i < check_days; i++)
+                    {
+                        dayOfCurrentPhase = Math.Min(dayOfCurrentPhase + 1, (crop.phaseDays.Count > 0) ? crop.phaseDays[Math.Min(crop.phaseDays.Count - 1, currentPhase)] : 0);
+                        if (dayOfCurrentPhase >= ((crop.phaseDays.Count > 0) ? crop.phaseDays[Math.Min(crop.phaseDays.Count - 1, crop.currentPhase.Value)] : 0) && (int)currentPhase < crop.phaseDays.Count - 1)
+                        {
+                            currentPhase++;
+                            dayOfCurrentPhase = 0;
+                        }
+                        while ((int)currentPhase < crop.phaseDays.Count - 1 && crop.phaseDays.Count > 0 && crop.phaseDays[currentPhase] <= 0)
+                        {
+                            currentPhase++;
+                        }
+
+                        if (currentPhase >= crop.phaseDays.Count - 1 && dayOfCurrentPhase == 0)
+                        {
+                            giving = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (giving)
+            {
+                return taking ? EatMode.All : EatMode.OnlyGive;
+            }
+            else
+            {
+                return taking ? EatMode.OnlyTake : EatMode.None;
+            }
         }
 
-        void Compute_Tomorrow_inplace(Dictionary<Vector2, int[]> data_store, IEnumerable<TerrainFeature> t_features, EatMode eatMode)
+        void ComputeDietEffects(Dictionary<Vector2, int[]> data_store, IEnumerable<TerrainFeature> t_features, EatMode eatMode, int check_days = 1)
         {
             // RECORD ALL THE EFFECTS OF TREES AND CROPS
             foreach (TerrainFeature t in t_features)
             {
-                
                 if (t is Tree tree)
                 {
-                    if (IsTreeEating(tree)) // This is already true at this point.
+                    if (IsTreeEating(tree, check_days))  // Should find a way to not be calculating this twice.
                     {
                         int[][] next_soil_health = NextTreeSoilHealth(data_store, tree, eatMode);
                         ApplyAreaHealth(data_store, tree.Tile, next_soil_health);
@@ -335,22 +388,15 @@ namespace RegenerativeAgriculture
                 }
                 else if (t is FruitTree fruitTree)
                 {
-                    if (IsFruitTreeEating(fruitTree))
+                    if (IsFruitTreeEating(fruitTree, check_days))
                     {// Ensure is in season or not fully grown.
                         int[][] next_soil_health = NextTreeSoilHealth(data_store, fruitTree, eatMode);
-
                         ApplyAreaHealth(data_store, fruitTree.Tile, next_soil_health);
                     }
                 }
                 else if (t is Bush bush)
                 {
-                    bool proceed_flag = false;
-                    // If not fully grown or In Bloom
-                    ICustomBush customBush;
-                    string customBushId = null;
-                    bool is_custom_bush = mod_entry.customBushApi.TryGetCustomBush(bush, out customBush, out customBushId);
-
-                    if (IsBushEating(bush, customBush))
+                    if (IsBushEating(bush, check_days))
                     {
                         int[][] next_soil_health = NextBushSoilHealth(data_store, bush, eatMode);
                         ApplyAreaHealth(data_store, bush.Tile, next_soil_health);
@@ -358,7 +404,9 @@ namespace RegenerativeAgriculture
                 }
                 else if (t is HoeDirt hoeDirt)
                 {
-                    if (IsCropEating(hoeDirt))
+                    // Check if crop is actually doing the type of eating we're trying to do.
+                    EatMode crop_current_eat_mode = IsCropEating(hoeDirt, check_days);
+                    if (crop_current_eat_mode == eatMode || crop_current_eat_mode == EatMode.All)
                     {
                         int[] next_soil_health = NextCropSoilHealth(data_store, hoeDirt, eatMode);
                         data_store[hoeDirt.Tile] = next_soil_health;
@@ -367,13 +415,13 @@ namespace RegenerativeAgriculture
             }
         }
 
-        public void GenerateDeathPreview(Dictionary<Vector2, int[]> health_data, IEnumerable<TerrainFeature> t_features)
+        public void SetDeathPreview(Dictionary<Vector2, int[]> health_data, IEnumerable<TerrainFeature> t_features)
         {
             // Dictionary<Vector2, float> result = new();
             foreach (TerrainFeature t in t_features)
             {
                 int missing_nutrients = -health_data[t.Tile].Select(x => Math.Min(x, 0)).Sum();
-                death_preview[t.Tile] = missing_nutrients * death_chance_per_missing_nutrient;
+                death_preview[t.Tile] = missing_nutrients; // * death_chance_per_missing_nutrient;
             }
             // death_preview = result;
         }
@@ -397,38 +445,17 @@ namespace RegenerativeAgriculture
 
                 int[] next_soil_health = data_store[value.Tile];
                 int missing_nutrients = -next_soil_health.Select(x => Math.Min(x, 0)).Sum();
-
-                if (value is HoeDirt hoeDirt)
+                if (missing_nutrients > 0)
                 {
-                    if (missing_nutrients * death_chance_per_missing_nutrient > Game1.random.NextDouble())
+                    if (value is HoeDirt hoeDirt)
                     {
-                        // TODO: Add global broadcast about dead crops.
+                        // TODO: Add global message about dead crops.
                         hoeDirt.crop.Kill();
                     }
-
-                }
-                else if (value is Tree tree)
-                {
-                    if (missing_nutrients * death_chance_per_missing_nutrient > Game1.random.NextDouble())
+                    else
                     {
-                        // TODO: Add global broadcast about dead crops.
-                        tree.Location.terrainFeatures.Remove(tree.Tile);
-                    }
-                }
-                else if (value is Bush bush)
-                {
-                    if (missing_nutrients * death_chance_per_missing_nutrient > Game1.random.NextDouble())
-                    {
-                        // TODO: Add global broadcast about dead crops.
-                        bush.Location.terrainFeatures.Remove(bush.Tile);
-                    }
-                }
-                else if (value is FruitTree fruitTree)
-                {
-                    if (missing_nutrients * death_chance_per_missing_nutrient > Game1.random.NextDouble())
-                    {
-                        // TODO: Add global broadcast about dead crops.
-                        fruitTree.Location.terrainFeatures.Remove(fruitTree.Tile);
+                        // Trees, FruitTrees, Bushes
+                        value.Location.terrainFeatures.Remove(value.Tile);
                     }
                 }
             }
@@ -442,7 +469,7 @@ namespace RegenerativeAgriculture
 
             for (int i = 0; i < 4; i++)
             {
-                if ((eatMode == EatMode.OnlyTake && crop_diet[i] < 0) || (eatMode == EatMode.OnlyGive && crop_diet[i] > 0))
+                if ((eatMode == EatMode.OnlyTake && crop_diet[i] < 0) || (eatMode == EatMode.OnlyGive && crop_diet[i] > 0) || eatMode == EatMode.None)
                 {
                     continue;
                 }
@@ -515,7 +542,6 @@ namespace RegenerativeAgriculture
                 }
             }
             int center_tile = result.Count / 2; // This should floor
-            mod_entry.Monitor.LogOnce($"{center_tile}, {result.Count}", LogLevel.Debug);
 
             // Tree takes or gives tree_diet to extremeties wherever possible.
             for (int i = 0; i < 4; i++)
@@ -524,48 +550,60 @@ namespace RegenerativeAgriculture
                 {
                     continue;
                 }
-                // Let the tree eat first
-                result[center_tile][i] -= diet[i];
 
-                // Now let the tile underneath it prepare for next meal:
-
-                // FAIRLY CONFUSING LOGIC WARNING!!!
-                // This number is how much to TAKE from extremity tiles.  Negative values will GIVE to extremity tiles
-                int diet_take_capacity = Math.Max(Math.Min(result[center_tile][i] + 2 * diet[i], max_health), 0) - result[center_tile][i];  // Determine how far we can go without hitting the max or min value.
-                int take_amount = Math.Sign(diet_take_capacity);  // Amount to take / give each step to extremities each step
-
-                // Setup Set of allowed indices to take from (exlude center tile)
-                HashSet<int> not_full_indices = new HashSet<int>();
-                for (int m = 0; m < result.Count; m++)
+                // Logic
+                // if taking, eat from all tiles in randomized order, and then continue if we failed to take from some empty tiles.
+                // if giving, give to all tiles, but don't fill if tried to give to full tiles.
+                if (eatMode == EatMode.OnlyGive || eatMode == EatMode.All)
                 {
-                    not_full_indices.Add(m);
+                    for (int t = 0; t < result.Count; t++)
+                    {
+                        if (t == center_tile)
+                        {
+                            // Skip center tile so the math for players is simpler. (i.e. they have access to all affecting tiles, rather than the inaccessible center tile)
+                            continue;
+                        }
+                        result[t][i] = Math.Clamp(result[t][i] - diet[i], 0, max_health);
+                    }
                 }
-                not_full_indices.Remove(center_tile);
-                HashSet<int> todo_indices = not_full_indices.DeepClone();
-                while (not_full_indices.Count > 0 && diet_take_capacity != 0)
+                if (eatMode == EatMode.OnlyTake || eatMode == EatMode.All)
                 {
-                    if (todo_indices.Count == 0)
+                    int diet_take_capacity = diet[i] * (result.Count - 1);  // Determine how far we can go without hitting the max or min value.
+                    int take_amount = Math.Sign(diet_take_capacity);  // Amount to take / give each step to extremities each step
+
+                    // Setup Set of allowed indices to take from (exlude center tile)
+                    HashSet<int> not_full_indices = new HashSet<int>();
+                    for (int m = 0; m < result.Count; m++)
                     {
-                        // If we've gone through all the tiles, repeat again.
-                        todo_indices = not_full_indices.DeepClone();
+                        not_full_indices.Add(m);
                     }
-                    int target_ind = todo_indices.ElementAt(Game1.random.Next(todo_indices.Count));
-                    int new_val = result[target_ind][i] - take_amount;
-                    if ((take_amount > 0 && new_val < 0) || (take_amount < 0 && new_val > max_health))
+                    not_full_indices.Remove(center_tile);
+                    HashSet<int> todo_indices = not_full_indices.DeepClone();
+                    while (not_full_indices.Count > 0 && diet_take_capacity != 0)
                     {
-                        // If we ran out of nutrient to take or space to give to, remove this ind from the not full indices
-                        not_full_indices.Remove(target_ind);
+                        if (todo_indices.Count == 0)
+                        {
+                            // If we've gone through all the tiles, repeat again.
+                            todo_indices = not_full_indices.DeepClone();
+                        }
+                        int target_ind = todo_indices.ElementAt(Game1.random.Next(todo_indices.Count));
+                        int new_val = result[target_ind][i] - take_amount;
+                        if ((take_amount > 0 && new_val < 0) || (take_amount < 0 && new_val > max_health))
+                        {
+                            // If we ran out of nutrient to take or space to give to, remove this ind from the not full indices
+                            not_full_indices.Remove(target_ind);
+                        }
+                        else
+                        {
+                            // Remove diet from target, take to center, and lower the remaining to take.
+                            result[target_ind][i] -= take_amount;
+                            diet_take_capacity -= take_amount;
+                        }
+                        todo_indices.Remove(target_ind);
                     }
-                    else
-                    {
-                        // Remove diet from target, take to center, and lower the remaining to take.
-                        result[target_ind][i] -= take_amount;
-                        result[center_tile][i] += take_amount;
-                        diet_take_capacity -= take_amount;
-                    }
-                    todo_indices.Remove(target_ind);
+                    // Take from center tile as a last resort.  If this goes under 0 the plant will run death logic.
+                    result[center_tile][i] -= diet_take_capacity; 
                 }
-                // Take the result of eating or giving to this trees tile, then ADD to that tile the amount we TRIED TO TAKE from extremeties, and SUBTRACT what we weren't able to take.
             }
             return result.ToArray();
         }

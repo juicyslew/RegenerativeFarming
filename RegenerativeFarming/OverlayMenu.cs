@@ -180,7 +180,7 @@ namespace RegenerativeAgriculture
                 }
             }
             string extra_text = string.Format("{0:0.00}", settings.overlay_opacity);
-            Drawer.DrawInfoBox(spriteBatch, colors, 10, 10, new int[] { 4, 4, 4, 4 }, "Overlay Selected", width: 450, extra_text: extra_text);
+            Drawer.DrawInfoBox(spriteBatch, colors, 10, 10, new int[] { 4, 4, 4, 4 }, "Overlay", width: 200, extra_text: extra_text);
         }
 
         private void DrawRadius(SpriteBatch spriteBatch, Vector2 tile, Color color, int radius, int borderSize = 2, int shaveSide = 0)
