@@ -15,6 +15,7 @@ using xTile.Tiles;
 using StardewMods.CustomBush;
 using StardewMods.CustomBush.Framework;
 using Force.DeepCloner;
+using xTile.Dimensions;
 
 namespace RegenerativeAgriculture
 {
@@ -125,14 +126,19 @@ namespace RegenerativeAgriculture
 
                     float lerp_amount = (float)soil_health[settings.displayed_measure] / SharedData.max_health;
                     disp_color = Color.Lerp(min_color, max_color, lerp_amount * MathF.Min(1f, .6f + settings.overlay_opacity));
-                    if (shared_data.GetDeathPreview(tile) > 0)
+                    int[]? health_preview = shared_data.GetHealthPreview(tile);
+                    if (health_preview is not null && HealthHelper.GetMissingNutrients(health_preview) > 0)
                     {
                         danger_tiles.Add(tile);
                     }
                 }
-                else
+                else if (current_location.doesTileHaveProperty((int)tile.X, (int)tile.Y, "Diggable", "Back") == "T")
                 {
                     disp_color = unknown_color;
+                }
+                else
+                {
+                    continue;
                 }
                 DrawHelper.DrawLine(spriteBatch, screenX + (float)this.TileGap, screenY + (float)this.TileGap, new Vector2(tileSize - this.TileGap * 2, tileSize - this.TileGap * 2), disp_color);
             }
@@ -180,7 +186,7 @@ namespace RegenerativeAgriculture
                 }
             }
             string extra_text = string.Format("{0:0.00}", settings.overlay_opacity);
-            Drawer.DrawInfoBox(spriteBatch, colors, 10, 10, new int[] { 4, 4, 4, 4 }, "Overlay", width: 200, extra_text: extra_text);
+            Drawer.DrawInfoBoxShapes(spriteBatch, colors, 10, 10, new int[] { 4, 4, 4, 4 }, "Overlay", width: 200, extra_text: extra_text);
         }
 
         private void DrawRadius(SpriteBatch spriteBatch, Vector2 tile, Color color, int radius, int borderSize = 2, int shaveSide = 0)

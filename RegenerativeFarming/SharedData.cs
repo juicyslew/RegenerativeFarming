@@ -45,7 +45,7 @@ namespace RegenerativeAgriculture
         public Dictionary<GameLocation, Dictionary<Vector2, int[]>> soil_health_data = new();
         public int soil_health_xpad = 2;
         public int soil_health_ypad = 2;
-        Dictionary<Vector2, float> death_preview = new();
+        Dictionary<Vector2, int[]> health_preview = new();
 
 
         public Dictionary<GameLocation, HashSet<Vector2>> surveyed_tiles;  // Acts as a mask for what tiles to show soil health for!
@@ -128,7 +128,7 @@ namespace RegenerativeAgriculture
             {
                 if (!soil_health_data.ContainsKey(e.NewLocation))
                 {
-                    death_preview = new();
+                    health_preview = new();
                     surveyed_tiles[e.NewLocation] = new();
                     GenerateSoilHealth(e.NewLocation);
                 }
@@ -185,9 +185,13 @@ namespace RegenerativeAgriculture
             }
         }
 
-        public float GetDeathPreview(Vector2 tile)
+        public int[]? GetHealthPreview(Vector2 tile)
         {
-            return death_preview.GetValueOrDefault(tile, 0f);
+            if (!health_preview.ContainsKey(tile))
+            {
+                return null;
+            }
+            return health_preview[tile];
         }
 
         public int[] GetSoilHealth(GameLocation location, Vector2 tile)
@@ -295,7 +299,7 @@ namespace RegenerativeAgriculture
             ComputeDietEffects(data_store, t_features, EatMode.OnlyTake, check_days: days_until_monday);
 
             // Generate the death preview!
-            SetDeathPreview(data_store, t_features);
+            SetDeathPreview(data_store); // , t_features);
         }
 
         public bool IsTreeEating(Tree tree, int check_days = 1)
@@ -328,7 +332,7 @@ namespace RegenerativeAgriculture
             Crop crop = hoeDirt.crop;
             bool taking = false;
             bool giving = false;
-            if (crop is not null)
+            if (crop is not null && !crop.dead.Value)
             {
                 bool crop_just_planted = crop.currentPhase.Value == 0 && crop.dayOfCurrentPhase.Value == 0;
                 if (crop_just_planted)
@@ -415,15 +419,17 @@ namespace RegenerativeAgriculture
             }
         }
 
-        public void SetDeathPreview(Dictionary<Vector2, int[]> health_data, IEnumerable<TerrainFeature> t_features)
+        public void SetDeathPreview(Dictionary<Vector2, int[]> health_data)  // , IEnumerable<TerrainFeature> t_features)
         {
-            // Dictionary<Vector2, float> result = new();
-            foreach (TerrainFeature t in t_features)
-            {
-                int missing_nutrients = -health_data[t.Tile].Select(x => Math.Min(x, 0)).Sum();
-                death_preview[t.Tile] = missing_nutrients; // * death_chance_per_missing_nutrient;
-            }
-            // death_preview = result;
+            //// Dictionary<Vector2, float> result = new();
+            //foreach (TerrainFeature t in t_features)
+            //{
+            //    int missing_nutrients = -health_data[t.Tile].Select(x => Math.Min(x, 0)).Sum();
+            //    death_preview[t.Tile] = missing_nutrients; // * death_chance_per_missing_nutrient;
+            //}
+            //// death_preview = result;
+
+            health_preview = health_data;
         }
         void ClampHealth(Dictionary<Vector2, int[]> store)
         {
@@ -623,5 +629,11 @@ namespace RegenerativeAgriculture
         }
     }
 
-    
+    public static class HealthHelper
+    {
+        public static int GetMissingNutrients(int[] soil_health)
+        {
+            return -soil_health.Select(x => Math.Min(x, 0)).Sum();
+        }
+    }
 }

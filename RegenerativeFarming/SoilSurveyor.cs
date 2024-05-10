@@ -117,6 +117,9 @@ namespace RegenerativeAgriculture
 
             // Set Surveyed tile here.
             shared_data.surveyed_tiles[location].Add(tile);
+            
+            // Recalculate health preview by swiging soil surveyor
+            shared_data.UpdateDeathPreview(location);
 
             // TODO: Check that there's no building in the way of your swing.
 

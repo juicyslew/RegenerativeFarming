@@ -155,6 +155,7 @@ namespace RegenerativeAgriculture
             health_icons = helper.GameContent.Load<Texture2D>($"{ModManifest.UniqueID}/2x_soil_measure_icons.png");
             aoe_icons = helper.GameContent.Load<Texture2D>($"{ModManifest.UniqueID}/radius_icons_no_support_lines.png");
             caution_icons = helper.GameContent.Load<Texture2D>($"{ModManifest.UniqueID}/caution_icons.png");
+            health_bars = helper.GameContent.Load<Texture2D>($"{ModManifest.UniqueID}/health_bars_2.png");
             // Try to use this for determining when held item is crop
             //crop_data = helper.GameContent.Load<string, string>("Data/Crops");
             //fruitTree_data = helper.GameContent.Load<string, string>("Data/"???);
@@ -245,6 +246,10 @@ namespace RegenerativeAgriculture
             else if (e.NameWithoutLocale.IsEquivalentTo($"{ModManifest.UniqueID}/caution_icons.png"))
             {
                 e.LoadFromModFile<Texture2D>("assets/caution_icons.png", StardewModdingAPI.Events.AssetLoadPriority.Low);
+            }
+            else if (e.NameWithoutLocale.IsEquivalentTo($"{ModManifest.UniqueID}/health_bars_2.png"))
+            {
+                e.LoadFromModFile<Texture2D>("assets/health_bars_2.png", StardewModdingAPI.Events.AssetLoadPriority.Low);
             }
             //else if (e.NameWithoutLocale.IsEquivalentTo("Data/Shops"))
             //{
@@ -428,17 +433,18 @@ namespace RegenerativeAgriculture
                     // Soil Surveyor UI (On holding Hoe / Seed / Surveyor, and mousing over surveyed tile)
                     bool double_ui_flag = true;
                     int[]? soil_health = null;
-                    int[]? next_soil_health_unclamped = null;
+                    int[]? preview_health = null;
                     if (shared_data.surveyed_tiles[current_location].Contains(Game1.currentCursorTile))
                     {
-                        soil_health = shared_data.GetSoilHealth(Game1.currentLocation, Game1.currentCursorTile);
-                        if (held_diet is not null)
-                        {
-                            next_soil_health_unclamped = new int[4];
+                        soil_health = shared_data.GetSoilHealth(current_location, Game1.currentCursorTile);
+                        preview_health = shared_data.GetHealthPreview(Game1.currentCursorTile);
+                        // If there isn't health preview use the seed we're holding to generate a quick health preview.
+                        if (preview_health is null && held_diet is not null)
+                        {  
+                            preview_health = new int[4];
                             for (int i = 0; i < 4; i++)
                             {
-                                // Clamped at -1 so that I can still know if we should show Danger ui in the drawing function.
-                                next_soil_health_unclamped[i] = Math.Min(Math.Max(soil_health[i] - held_diet[i], -1), SharedData.max_health);
+                                preview_health[i] = soil_health[i] - held_diet[i]; // Why clamp this?? //  Math.Min(Math.Max(soil_health[i] - held_diet[i], -1), SharedData.max_health);
                             }
                         }
                     }
@@ -446,11 +452,11 @@ namespace RegenerativeAgriculture
 
                     string title = "Soil Health";
                     int health_box_width = Math.Max(title.Length * 22, 13 * 22);
-                    int health_box_height = 180;
+                    int health_box_height = 200;
                     Vector2 mouse_world_coordinates = Game1.currentViewportTarget + Game1.getMousePosition().ToVector2();
-                    int xPosition = mouse_world_coordinates.X < Game1.getPlayerOrEventFarmer().StandingPixel.X ? Game1.getMouseX() - health_box_width - 32 : Game1.getMouseX() + 32;
-                    int yPosition = mouse_world_coordinates.Y < Game1.getPlayerOrEventFarmer().StandingPixel.Y ? Game1.getMouseY() - health_box_height - 32 : Game1.getMouseY() + 32;
-                    Drawer.DrawInfoBox(e.SpriteBatch, shared_data.measure_colors, xPosition, yPosition, soil_health, title, width: health_box_width, next_health_data: next_soil_health_unclamped);
+                    int xPosition = mouse_world_coordinates.X < Game1.getPlayerOrEventFarmer().StandingPixel.X ? Game1.getMouseX() - health_box_width - 42 : Game1.getMouseX() + 42;
+                    int yPosition = mouse_world_coordinates.Y < Game1.getPlayerOrEventFarmer().StandingPixel.Y ? Game1.getMouseY() - health_box_height - 42 : Game1.getMouseY() + 42;
+                    Drawer.DrawInfoBox(e.SpriteBatch, shared_data.measure_colors, xPosition, yPosition, soil_health, title, width: health_box_width, next_health_data: preview_health);
                     // Moused Over Crop Diet UI (For seeing the diet of the crop you're looking at currently!)
                     if (current_location.terrainFeatures.ContainsKey(Game1.currentCursorTile))
                     {
@@ -494,13 +500,6 @@ namespace RegenerativeAgriculture
                             }
                             eating = shared_data.IsBushEating(bush);
                         }
-
-
-                        int chance_of_death = -1;
-                        if (holding_surveyor && eating)
-                        {
-                            chance_of_death = (int)(shared_data.GetDeathPreview(t.Tile) * 100);
-                        }
                         
 
                         if (crop_id is not null)
@@ -509,15 +508,13 @@ namespace RegenerativeAgriculture
                             int[] crop_diet = shared_data.GetCropDiet(crop_id);
                             string diet_title = $"{crop_name} Diet";
 
-                            // Only one of these can be true at a time.
-                            string death_text = (chance_of_death <= 0) ? "" : "Dying!";
-                            int diet_box_width = Math.Max(diet_title.Length * 22, (death_text.Length + 12) * 22);
-                            int diet_box_height = 180;
-                            xPosition = mouse_world_coordinates.X < Game1.getPlayerOrEventFarmer().StandingPixel.X ? Game1.getMouseX() - diet_box_width - 32 : Game1.getMouseX() + 32;
+                            int diet_box_width = Math.Max(diet_title.Length * 22, 320);
+                            int diet_box_height = 200;
+                            xPosition = mouse_world_coordinates.X < Game1.getPlayerOrEventFarmer().StandingPixel.X ? Game1.getMouseX() - diet_box_width - 42 : Game1.getMouseX() + 42;
                             int yExtraOffset = double_ui_flag ? diet_box_height : 0;
-                            yPosition = mouse_world_coordinates.Y < Game1.getPlayerOrEventFarmer().StandingPixel.Y ? Game1.getMouseY() - diet_box_height - 32 - yExtraOffset : Game1.getMouseY() + 32 + yExtraOffset;
+                            yPosition = mouse_world_coordinates.Y < Game1.getPlayerOrEventFarmer().StandingPixel.Y ? Game1.getMouseY() - diet_box_height - 42 - yExtraOffset : Game1.getMouseY() + 42 + yExtraOffset;
 
-                            Drawer.DrawInfoBox(e.SpriteBatch, shared_data.measure_colors, xPosition, yPosition, crop_diet, diet_title, is_diet: true, width: diet_box_width, extra_text: death_text);
+                            Drawer.DrawInfoBox(e.SpriteBatch, shared_data.measure_colors, xPosition, yPosition, crop_diet, diet_title, is_diet: true, width: diet_box_width);
                         }
                     }
                 }
@@ -587,13 +584,13 @@ namespace RegenerativeAgriculture
 
     static class Drawer
     {
-        public static void DrawInfoBox(SpriteBatch sprite_batch, Color[] measure_colors, int xPosition, int yPosition, int[]? health_data, string titleToRender, bool is_diet = false, int width = 320, string extra_text = null, int[]? next_health_data = null, int radius = 0)
+        public static void DrawInfoBoxShapes(SpriteBatch sprite_batch, Color[] measure_colors, int xPosition, int yPosition, int[]? health_data, string titleToRender, bool is_diet = false, int width = 320, string extra_text = null, int[]? next_health_data = null, int radius = 0)
         {
             // Make 0,0 the top left corner
             IClickableMenu.drawTextureBox(Game1.spriteBatch, xPosition, yPosition, width, 180, Color.White);
             sprite_batch.DrawString(Game1.dialogueFont, titleToRender, new Vector2(xPosition + 20, yPosition + 14), Color.Black * 0.2f);
             sprite_batch.DrawString(Game1.dialogueFont, titleToRender, new Vector2(xPosition + 22, yPosition + 16), Color.Black * 0.8f);
-            xPosition += 25;
+            xPosition += 20;
             yPosition += 60;
             // sprite_batch.Draw(Game1.mouseCursors, new Vector2(xPosition, yPosition), new Rectangle(60, 428, 10, 10), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0.85f);
             // sprite_batch.Draw(Game1.debrisSpriteSheet, new Vector2(xPosition + 32, yPosition + 10), Game1.getSourceRectForStandardTileSheet(Game1.debrisSpriteSheet, 8, 16, 16), Color.White, 0f, new Vector2(8f, 8f), 5f, SpriteEffects.None, 0.95f);
@@ -613,17 +610,20 @@ namespace RegenerativeAgriculture
             {
                 for (int i = 0; i < 4; i++)
                 {
+                    int measure_bar_x = xPosition;
+                    int measure_bar_y = yPosition + 26 * i;
                     Color text_color = measure_colors[i];
                     if (next_health_data is not null && next_health_data[i] < health_data[i])
                     {
                         // Draw the preview (but only for taking... figure out what giving looks like at some point.)
-                        DrawMeasureIcons(sprite_batch, text_color, xPosition, yPosition + 26 * i, health_data[i], i, true);
+
+                        DrawMeasureIcons(sprite_batch, text_color, measure_bar_x, measure_bar_y, health_data[i], i, true);
                         if (next_health_data[i] <= -1)
                         {
                             // Display Danger Icon
                             sprite_batch.Draw(
                                 ModEntry.instance.caution_icons,
-                                new Vector2(xPosition + 216, yPosition + 26 * i),
+                                new Vector2(measure_bar_x + 216, measure_bar_y),
                                 new Rectangle(16, 0, 16, 16),
                                 Color.White,
                                 0f,
@@ -635,14 +635,14 @@ namespace RegenerativeAgriculture
                         }
                         else
                         {
-                            DrawMeasureIcons(sprite_batch, text_color, xPosition, yPosition + 26 * i, next_health_data[i], i, is_diet);
+                            DrawMeasureIcons(sprite_batch, text_color, measure_bar_x, measure_bar_y, next_health_data[i], i, is_diet);
                         }
 
                     }
                     else
                     {
                         // Just draw so
-                        DrawMeasureIcons(sprite_batch, text_color, xPosition, yPosition + 26 * i, health_data[i], i, is_diet);
+                        DrawMeasureIcons(sprite_batch, text_color, measure_bar_x, measure_bar_y, health_data[i], i, is_diet);
                     }
                 }
                 if (is_diet && radius > 0)
@@ -679,6 +679,119 @@ namespace RegenerativeAgriculture
                         0.85f
                     );
                 }
+            }
+        }
+
+        public static void DrawInfoBox(SpriteBatch sprite_batch, Color[] measure_colors, int xPosition, int yPosition, int[]? health_data, string titleToRender, bool is_diet = false, int width = 320, string extra_text = null, int[]? next_health_data = null, int radius = 0)
+        {
+            // Make 0,0 the top left corner
+            if (health_data is null)
+            {
+                return;
+            }
+            IClickableMenu.drawTextureBox(Game1.spriteBatch, xPosition, yPosition, width, 200, Color.White);
+            sprite_batch.DrawString(Game1.dialogueFont, titleToRender, new Vector2(xPosition + 20, yPosition + 14), Color.Black * 0.2f);
+            sprite_batch.DrawString(Game1.dialogueFont, titleToRender, new Vector2(xPosition + 22, yPosition + 16), Color.Black * 0.8f);
+            xPosition += 20;
+            yPosition += 60;
+            // sprite_batch.Draw(Game1.mouseCursors, new Vector2(xPosition, yPosition), new Rectangle(60, 428, 10, 10), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0.85f);
+            // sprite_batch.Draw(Game1.debrisSpriteSheet, new Vector2(xPosition + 32, yPosition + 10), Game1.getSourceRectForStandardTileSheet(Game1.debrisSpriteSheet, 8, 16, 16), Color.White, 0f, new Vector2(8f, 8f), 5f, SpriteEffects.None, 0.95f);
+            //if (health_data is null)
+            //{ // If I don't have this info, display questionmarks.
+            //    for (int i = 0; i < 4; i++)
+            //    {
+            //        Color text_color = measure_colors[i];
+            //        string text = "??";
+            //        sprite_batch.DrawString(Game1.dialogueFont, text, new Vector2(xPosition, yPosition + 6), text_color * 0.2f);
+            //        sprite_batch.DrawString(Game1.dialogueFont, text, new Vector2(xPosition + 2, yPosition + 4), text_color * 1.0f);
+            //        xPosition += (22 * text.Length) + 8;
+            //        //yPosition += 28;
+            //    }
+            //}
+            //else
+            //{
+            for (int i = 0; i < 4; i++)
+            {
+                int measure_bar_x = xPosition;
+                int measure_bar_y = yPosition + 28 * i;
+                Color text_color = measure_colors[i];
+                if (next_health_data is not null)
+                {
+                    if (health_data[i] < next_health_data[i])
+                    { // If we are gaining health
+                        // Draw NEXT health in preview giving format, then draw CURRENT health in giving format over the first.
+                        DrawMeasureBars(sprite_batch, text_color, measure_bar_x, measure_bar_y, next_health_data[i], i, false, preview_mode: true);
+                        DrawMeasureBars(sprite_batch, text_color, measure_bar_x, measure_bar_y, health_data[i], i, is_diet);
+                    }
+                    else if (health_data[i] > next_health_data[i])
+                    { // If we are losing health.
+                        // Draw CURRENT health in taking crop diet format, then draw NEW health in giving format over the first.
+                        DrawMeasureBars(sprite_batch, text_color, measure_bar_x, measure_bar_y, health_data[i], i, true, preview_mode: true);
+                        if (next_health_data[i] < 0)
+                        {
+                            // Display Danger Icon
+                            sprite_batch.Draw(
+                                ModEntry.instance.caution_icons,
+                                new Vector2(measure_bar_x + 216, measure_bar_y),
+                                new Rectangle(16, 0, 16, 16),
+                                Color.White,
+                                0f,
+                                Vector2.Zero,
+                                1.5f,
+                                SpriteEffects.None,
+                                0.85f
+                            );
+                        }
+                        else
+                        {
+                            DrawMeasureBars(sprite_batch, text_color, measure_bar_x, measure_bar_y, next_health_data[i], i, is_diet);
+                        }
+                    }
+                    else
+                    {
+                        // Just draw soil health
+                        DrawMeasureBars(sprite_batch, text_color, measure_bar_x, measure_bar_y, health_data[i], i, is_diet);
+                    }
+                }
+                else
+                {
+                    // Just draw soil health
+                    DrawMeasureBars(sprite_batch, text_color, measure_bar_x, measure_bar_y, health_data[i], i, is_diet);
+                }
+            }
+            if (is_diet && radius > 0)
+            {
+
+                int spr_width;
+                int spr_height;
+                int spr_x;
+                int spr_y;
+                if (radius == 1)
+                {
+                    spr_width = 48;
+                    spr_height = 48;
+                    spr_x = 0;
+                    spr_y = 0;
+                }
+                else
+                {
+                    // Radius == 2
+                    spr_width = 80;
+                    spr_height = 80;
+                    spr_x = 48;
+                    spr_y = 0;
+                }
+                sprite_batch.Draw(
+                    ModEntry.instance.aoe_icons,
+                    new Vector2(xPosition + 234, yPosition),
+                    new Rectangle(spr_x, spr_y, spr_width, spr_height),
+                    Color.Blue * .5f,
+                    0f,
+                    Vector2.Zero,
+                    2f,
+                    SpriteEffects.None,
+                    0.85f
+                );
             }
         }
 
@@ -739,56 +852,68 @@ namespace RegenerativeAgriculture
             );
         }
 
-        public static void DrawMeasureBars(SpriteBatch sprite_batch, Color color, int xpos, int ypos, int amount, int measure, bool is_diet)
+        public static void DrawMeasureBars(SpriteBatch sprite_batch, Color color, int xpos, int ypos, int amount, int measure, bool is_diet, bool preview_mode = false)
         {
-            throw new NotImplementedException();
-            // Render in 4x2 square, Eventually Center align it too.
             bool negative = false;
             if (amount < 0 || !is_diet)
             {
                 negative = true;
             }
             amount = Math.Abs(amount);
+            float fill_amount = (float)amount / SharedData.max_health;
 
-            int xind = 0;
-            int spr_width = 32;
+            int spr_width = 208;
             int spr_height = 32;
-            int spr_indx;
-            int spr_indy;
-            float scale = .75f;
-            while (amount > 4)
-            {
-                // Get correct tilesheet point and draw it based on measure and negative (amount is 4 in all of these cases)
+            int inner_bar_width = 20;
+            int inner_bar_length = 196;
+            float scale = 1f;
 
-                spr_indx = negative ? 6 : 7;
-                spr_indy = measure;
-                sprite_batch.Draw(
-                    ModEntry.instance.health_icons,
-                    new Vector2(xpos + xind * 26, ypos),
-                    new Rectangle(spr_width * spr_indx, spr_height * spr_indy, spr_width, spr_height),
-                    color * .8f,
-                    0f,
-                    Vector2.Zero,
-                    scale,
-                    SpriteEffects.None,
-                    0.85f
-                );
-                xind++;
-                amount -= 4;
-            }
+            Color bar_color = new Color(.25f + (color.R / 255f * .75f), .25f + (color.G / 255f * .75f), .25f + (color.B / 255f * .75f), 1f);
+            Color fill_color = new Color(.5f + (color.R / 255f / 2f), .5f + (color.G / 255f / 2f), .5f + (color.B / 255f / 2f), 1f);
+            fill_color.A = 255;
+
+
+            int spr_indy = measure;
+            // Draw bar content first, then draw bar outline on top.
 
             // Get correct tilesheet point and draw it based on amount, measure, and negative
             if (amount == 0)
             {
-                return;
             }
-            spr_indx = (amount - 1) * 2 + (negative ? 0 : 1);
-            spr_indy = measure;
+            else {
+                // Draw Bar Content (Shaded)
+
+                if (preview_mode && negative)
+                { // Draw small bar for preview negatives
+                    sprite_batch.Draw(
+                        ModEntry.instance.health_bars,
+                        new Rectangle(xpos + 6, ypos + 12, (int)(inner_bar_length * fill_amount), inner_bar_width - 14),
+                        new Rectangle(4, 11 + spr_indy * spr_height, 1, inner_bar_width - 12),
+                        fill_color
+                    );
+                }
+                else
+                {  // Draw large bar for everything else
+                    sprite_batch.Draw(
+                        ModEntry.instance.health_bars,
+                        new Rectangle(xpos + 6, ypos + 6, (int)(inner_bar_length * fill_amount), inner_bar_width),
+                        new Rectangle(4, 4 + spr_indy * spr_height, 1, inner_bar_width),
+                        fill_color
+                    );
+                }
+                if (!negative)
+                {  // Draw bg colored bar inside large bar if not negative.
+                    // Draw Second Bar on top of the first that makes it look hollow
+                    DrawHelper.DrawLine(sprite_batch, xpos + 6, ypos + 13, new Vector2((inner_bar_length * fill_amount), inner_bar_width - 14), new Color(249, 186, 102));
+                }
+            }
+
+            // Bar outline (Shaded)
             sprite_batch.Draw(
-                ModEntry.instance.health_icons,
-                new Vector2(xpos + xind * 26, ypos),
-                new Rectangle(spr_width * spr_indx, spr_height * spr_indy, spr_width, spr_height),
-                color * .8f,
+                ModEntry.instance.health_bars,
+                new Vector2(xpos, ypos),
+                new Rectangle(0, spr_height * spr_indy, spr_width, spr_height),
+                Color.Gray,
                 0f,
                 Vector2.Zero,
                 scale,
