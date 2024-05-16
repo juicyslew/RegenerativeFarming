@@ -13,7 +13,7 @@ using Microsoft.Xna.Framework;
 
 namespace RegenerativeAgriculture
 {
-    // Taken from the Automate mode and edited.
+    // Taken from the Automate mod and edited.
     internal abstract class BaseOverlay : IDisposable
     {
         private readonly IModEvents Events;

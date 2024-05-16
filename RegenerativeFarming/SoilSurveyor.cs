@@ -19,7 +19,7 @@ using StardewValley.Extensions;
 namespace RegenerativeAgriculture
 {
     [XmlType("Mods_Juicyslew_RegenerativeAgriculture_SoilSurveyor")]
-    public class SoilSurveyor : GenericTool
+    public class SoilSurveyor : Tool
     {
         private SharedData shared_data;
         public override string DisplayName => GetDisplayName();
@@ -82,6 +82,7 @@ namespace RegenerativeAgriculture
             var data = Game1.content.Load<Dictionary<string, SoilSurveyorData>>("Juicyslew.RegenerativeAgriculture/SoilSurveyor");
             Name = ItemId;
             Description = data[ItemId].Description;
+            UpgradeLevel = data[ItemId].UpgradeLevel;
         }
 
         public override bool canThisBeAttached(StardewValley.Object o)

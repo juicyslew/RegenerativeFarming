@@ -1,7 +1,7 @@
 {
   // General Balance Notes
   // Regenerative Stuff should be more expensive and should generally not return all of its value when successfully grown.
-  // Converters should return value and be varying ranges of effective.  These should vaguely give 1.5-2x the amount they eat (where each nutrients is 2x the cost of the last one)
+  // Converters should return value and be varying ranges of effective.  These should vaguely give 1-2x the amount they eat
   // Eaters should be cheap but challenging to grow, and obviously require some regenerative stuff to make work, that's where the cost comes from, not the seeds themselves.
 
   // The balancing should support the following playstyles:
@@ -15,8 +15,7 @@
   // Chopping down fruit trees to make sure they aren't dormant (at the cost of the fruit tree not maturing and giving more value later)
 
   // Numerical Balancing
-  // Generally speaking, the cheapest regenerators and least challenging eaters should have at most 8 diet.
-  // Generally make the first diet easiest to manage, second is twice is hard, 3rd is 4x, 4th is 8x and should be available sparingly.
+  // Generally the first nutrient is easiest to manage, with each next one becoming exponentially more challenging (and rewarding) to manage.
 
   // Generally vanilla crops will be easier to grow, and modded ones harder.
 
@@ -25,382 +24,383 @@
 
   // Vanilla Trees - Note these technically aren't "itemIds" but we can programmatically use the correct value.
   // NOTE: THESE CAN ONLY HAVE NEGATIVE VALUES
-  "(O)292": [ 0, 0, 0, -2 ], // Mahogany Seed - Rarer?
-  "(O)309": [ -12, 0, 0, 0 ], // Acorn (Oak)
-  "(O)310": [ 0, -6, 0, 0 ], // Maple Seed
-  "(O)311": [ 0, 0, -4, 0 ], // Pine Cone - Slightly rarer?
+  //"(O)292": [ 0, 0, 0, -2 ], // Mahogany Seed - Rarer?
+  //"(O)309": [ -12, 0, 0, 0 ], // Acorn (Oak)
+  //"(O)310": [ 0, -6, 0, 0 ], // Maple Seed
+  //"(O)311": [ 0, 0, -4, 0 ], // Pine Cone - Slightly rarer?
 
   // Vanille Fruit Trees
   // Generally make a good number of Fruit Trees cheaper and produce somewhat less value.  This way they can be accessible to the player.
   // Spring
-  "(O)628": [ 0, 40, 0, 0 ], // Cherry Sapling - 80/day, Challenging, Cost 3400 => 1000
-  "(O)629": [ -20, 0, 0, 0 ], // Apricot Sapling - 50 => 20, cost 2000 => 750
+  "(O)628": [ 0, -1, 0, 0 ], // Cherry Sapling - 80/day, Challenging, Cost 3400 => 1000
+  "(O)629": [ -2, 0, 0, 0 ], // Apricot Sapling - 50 => 20, cost 2000 => 750
   // Summer
-  "(O)69": [ 75, 0, 0, 2 ], // Banana Sapling - 150/day c???, think this is meant to be a reward, so don't make it too difficult to grow
-  "(O)835": [ 0, 20, 10, 2 ], // Mango Sapling - 130/day c???, think this is meant to be a reward, so don't make it too difficult to grow
-  "(O)630": [ 0, -25, 0, 0 ], // Orange Sapling - 100 => 25, c4000 => 1000, Cover Tree
-  "(O)631": [ 50, 0, 0, 0 ], // Peach Sapling - 140 => 80, c6000 => 1250, Cash Tree
+  "(O)69": [ 4, -1, 0, 0 ], // Banana Sapling - 150/day c???, think this is meant to be a reward, so don't make it too difficult to grow
+  "(O)835": [ 0, 1, 1, 0 ], // Mango Sapling - 130/day c???, think this is meant to be a reward, so don't make it too difficult to grow
+  "(O)630": [ 0, -1, 0, 0 ], // Orange Sapling - 100 => 25, c4000 => 1000, Cover Tree
+  "(O)631": [ 1, 1, 0, 0 ], // Peach Sapling - 140 => 80, c6000 => 1250, Cash Tree
   // Fall
-  "(O)632": [ 20, 20, 10, 5 ], // Pomegranate Sapling - 140 => 180, c6000 => 2000, Challenging Cash Tree
-  "(O)633": [ 40, -20, -10, 0 ], // Apple Sapling - 100 => 40, c4000 => 1500, Converter Tree
+  "(O)632": [ 1, 1, 1, 0 ], // Pomegranate Sapling - 140 => 180, c6000 => 2000, Challenging Cash Tree
+  "(O)633": [ 4, -2, -1, 0 ], // Apple Sapling - 100 => 40, c4000 => 1500, Converter Tree
 
   // Vanilla Bushes (Can grow anytime)
-  "(O)251": [ 0, 0, 8, 0 ], // Tea Sapling, Moderate Challenge, require consistent maintanence, Cash Crop.
+  "(O)251": [ 0, 1, 0, 0 ], // Tea Sapling, Moderate Challenge, require consistent maintanence, Cash Crop.
 
 
   // VANILLA CROPS
 
   // Spring
-  "(O)273": [ 1, 1, 0, 0 ], // Rice Shoot, Needs buff, but should be hard to grow, grows auto near water
-  "(O)427": [ -3, -3, 0, 0 ], // Tulip Bulb, Cover Crop, Good early game, lower profit.
-  "(O)429": [ -2, 0, -2, 0 ], // Jazz Seeds, Cover Crop, early game 3rd nutrient cover crop.
-  "(O)472": [ -2, -1, 0, 0 ], // Parnip Seeds, Easy, not particularly useful, but also ok profit, Allrounder. 35 => 30
-  "(O)473": [ 1, 0, 1, 0 ], // Bean Starter, bump value, Light Cash crop, Long grow time, careful not to let it die.
-  "(O)474": [ 3, 1, 0, 0 ], // Cauliflower Seeds, Cash crop
-  "(O)475": [ 5, 0, 0, 0 ], // Potato Seeds, Cash crop
-  "(O)476": [ -8, 3, 0, 0 ], // Garlic Seeds, Converter
-  "(O)477": [ 0, 0, 1, 0 ], // Kale Seeds, 
-  "(O)478": [ 0, 2, 1, 0 ], // Rhubarb Seeds c100 => 50
-  "(O)745": [ 1, 1, 1, 1 ], // Strawberry Seeds, not so expensive to grow for a while, but hard to maintain. c100 => 50
-  "(O)CarrotSeeds": [ 0, -4, -2, 0 ], // Rare, can't be bought.  3 day grow. 35 => 20
+  "(O)273": [ 0, 0, -8, 0 ], // Rice Shoot, Needs buff, but should be hard to grow, grows auto near water
+  "(O)427": [ -6, -6, 0, 0 ], // Tulip Bulb, Cover Crop, Good early game, lower profit.
+  "(O)429": [ -6, 0, -4, 0 ], // Jazz Seeds, Cover Crop, early game 3rd nutrient cover crop.
+  "(O)472": [ -8, 0, 0, 0 ], // Parsnip Seeds, Easy, not particularly useful, but also ok profit, Allrounder. 35 => 30
+  "(O)473": [ 8, 0, 4, 0 ], // Bean Starter, bump value, Light Cash crop, Long grow time, careful not to let it die.
+  "(O)474": [ 4, 4, 0, 0 ], // Cauliflower Seeds, Cash crop
+  "(O)475": [ 12, 0, 0, 0 ], // Potato Seeds, Cash crop
+  "(O)476": [ -10, 4, 0, 0 ], // Garlic Seeds, Converter
+  "(O)477": [ 0, 0, 4, 0 ], // Kale Seeds, 
+  "(O)478": [ 0, 6, 4, 0 ], // Rhubarb Seeds c100 => 50, Challenge
+  "(O)745": [ 4, 4, 4, 4 ], // Strawberry Seeds, not so expensive to grow for a while, but hard to maintain. c100 => 50
+  "(O)CarrotSeeds": [ 0, -3, -3, 0 ], // Rare, can't be bought.  3 day grow. 35 => 20
 
   // Spring + Summer
 
   // Spring + Summer + Fall
-  "(O)499": [ 3, 3, 3, 3 ], // Ancient Seeds, Very Challenging Sleeper Crop, you can get 8 harvests out of this normally 550 => 1100
+  "(O)499": [ 8, 8, 8, 8 ], // Ancient Seeds, Very Challenging Sleeper Crop, you can get 8 harvests out of this normally 550 => 1100
 
   // All
-  "(O)885": [ -1, -1, -1, -1 ], // Fiber Seeds, Good, Cheap Cover Crop.
+  "(O)885": [ -2, -2, -2, -2 ], // Fiber Seeds, Good, Cheap Cover Crop.
   "(O)890": [ 0, 0, 0, 0 ], // Qi Bean
 
 
   // Summer
-  "(O)302": [ 5, 5, 5, 0 ], // Hops Starter, Challenging Cash Crop. (M)Bush 25 => 30
-  "(O)431": [ -3, 0, -2, 0 ], // Sunflower Seeds, Cover Crop, you can get seeds from harvest. 
-  "(O)433": [ 0, 10, 0, 0 ], // Coffee Bean, (M)Bush, vaguely a cash crop? 15 => 25
-  "(O)453": [ 0, -6, 0, 0 ], // Poppy Seeds, cover crop, MAYBE lower profit, unsure. c100 => 150 
-  "(O)455": [ 0, 0, 0, -2 ], // Spangle Seeds, light cover crop, MAYBE bump profit up.
-  "(O)479": [ 0, 0, 2, 0 ], // Melon Seeds
-  "(O)480": [ 10, -6, -3, 0 ], // Tomato Seeds, Converter
-  "(O)481": [ 20, 0, 0, 2 ], // Blueberry Seeds, (M)Bush c80 => 50
-  "(O)482": [ 2, 0, 1, 0 ], // Pepper Seeds
+  "(O)302": [ 1, 1, 1, 0 ], // Hops Starter, Challenging Cash Crop. (M)Bush 25 => 30
+  "(O)433": [ 0, 0, 1, 0 ], // Coffee Bean, (M)Bush, vaguely a cash crop? 15 => 25
+  "(O)453": [ 0, -12, 0, 0 ], // Poppy Seeds, cover crop, MAYBE lower profit, unsure. c100 => 150 
+  "(O)455": [ 0, 0, 0, -10 ], // Spangle Seeds, light cover crop, MAYBE bump profit up.
+  "(O)479": [ 0, 0, 6, 0 ], // Melon Seeds
+  "(O)480": [ 12, 4, 0, 0 ], // Tomato Seeds
+  "(O)481": [ 2, 0, 0, 1 ], // Blueberry Seeds, (M)Bush c80 => 50
+  "(O)482": [ 0, 6, 4, 0 ], // Pepper Seeds
   "(O)484": [ -8, 0, 0, 0 ], // Radish Seeds, 90 => 50, c40 => 60
-  "(O)485": [ 0, 0, 0, 1 ], // Red Cabbage Seeds
-  "(O)486": [ 0, 2, 2, 2 ], // Starfruit Seeds, Challenging Cash Crop c400 => 100, 750 => 1200, REALLY hard to grow, like prohibitively so.
-  "(O)831": [ 2, 1, 0, 0 ], // Taro Tuber, All season on ginger island
-  "(O)833": [ 0, 0, 1, 1 ], // Pineapple Seeds, 
+  "(O)485": [ 0, 0, 0, 8 ], // Red Cabbage Seeds
+  "(O)486": [ 0, 4, 4, 6 ], // Starfruit Seeds, Challenging Cash Crop c400 => 100, 750 => 1200, REALLY hard to grow, like prohibitively so.
+  "(O)831": [ 2, 2, 0, 0 ], // Taro Tuber, All season on ginger island
+  "(O)833": [ 0, 0, 2, 2 ], // Pineapple Seeds, 
   "(O)SummerSquashSeeds": [ -6, 0, -2, 0 ], // Challenge reward, don't make too hard to grow 45 => 30
 
 
   // Summer + Fall
-  "(O)483": [ -4, -2, 0, 0 ], // Wheat Seeds, Bit of a nothing crop. c10 => 20
-  "(O)487": [ 1, -1, 0, 0 ], // Corn Seeds, slow converter, plant on blue and get great green by the end of harvest
+  "(O)431": [ -6, 0, -6, 0 ], // Sunflower Seeds, Cover Crop, you can get seeds from harvest. 
+  "(O)483": [ -4, -4, 0, 0 ], // Wheat Seeds, Bit of a nothing crop. c10 => 20
+  "(O)487": [ 8, 4, 4, 0 ], // Corn Seeds, slow converter, plant on blue and get great green by the end of harvest
 
 
   // Fall
-  "(O)299": [ 4, 2, -4, 0 ], // Amaranth Seeds, Converter
-  "(O)301": [ -8, 16, 0, 0 ], // Grape Starter,  Converter (M)Bush
-  "(O)347": [ 0, 0, 2, 1 ], // Rare Seed 3000 => 4500
-  "(O)425": [ 0, 0, -2, -2 ], // Fairy Seeds c200 => 400
-  "(O)488": [ 4, 1, 0, 0 ], // Eggplant Seeds 60 => 100
-  "(O)489": [ 0, 2, 2, 0 ], // Artichoke Seeds, YEAR 2!
-  "(O)490": [ 3, 0, 1, 0 ], // Pumpkin Seeds
-  "(O)491": [ -10, 0, 0, 0 ], // Bok Choy Seeds c50 => 100
-  "(O)492": [ 8, -5, -3, 0 ], // Yam Seeds c60 => 100, 160 => 250
-  "(O)493": [ 2, 2, 2, 1 ], // Cranberry Seeds
-  "(O)494": [ -6, -3, 2, 0 ], // Beet Seeds
+  "(O)299": [ 8, 8, -4, -4 ], // Amaranth Seeds, Converter
+  "(O)301": [ -2, 2, 0, 0 ], // Grape Starter,  Converter (M)Bush
+  "(O)347": [ 32, 8, 8, 16 ], // Rare Seed 3000 => 4500
+  "(O)425": [ -6, -6, -6, -6 ], // Fairy Seeds c200 => 400
+  "(O)488": [ 16, 8, 0, 0 ], // Eggplant Seeds 60 => 100
+  "(O)489": [ 0, 6, 6, 0 ], // Artichoke Seeds, YEAR 2!
+  "(O)490": [ 8, 0, 4, 0 ], // Pumpkin Seeds
+  "(O)491": [ -16, 0, 0, 0 ], // Bok Choy Seeds c50 => 100
+  "(O)492": [ 16, -8, -4, 0 ], // Yam Seeds c60 => 100, 160 => 250
+  "(O)493": [ 8, 8, 8, 4 ], // Cranberry Seeds
+  "(O)494": [ -8, -6, 4, 0 ], // Beet Seeds
   "(O)BroccoliSeeds": [ -4, -4, 0, 0 ], // Challenge reward, don't make too hard to grow 70 => 40
 
   // Winter
-  "(O)PowdermelonSeeds": [ -3, -3, -2, 0 ], // Challenge reward, don't make too hard to grow 60 => 50
+  "(O)PowdermelonSeeds": [ -6, -4, -2, 0 ], // Challenge reward, don't make too hard to grow 60 => 50
 
   // NONE
-  "(O)802": [ 2, 2, 0, 0 ], // Cactus Seeds, Bush, Greenhouse only c150 => 100 
+  "(O)802": [ 8, 8, 0, 0 ], // Cactus Seeds, Bush, Greenhouse only c150 => 100 
 
 
   // MODDED 
   // Spring
   // -- Right Circle of conversion { Onion, Red Onion, Shallot, Sugar Beet} --
-  "(O)Cornucopia_SpringOnionSeeds": [ 0, -4, -2, 0 ], // 40 => 20, c30 => 50
+  "(O)Cornucopia_SpringOnionSeeds": [ 0, -8, -4, 0 ], // 40 => 20, c30 => 50
 
   // There is an onion pipeline here.  Buckwheat => Onion => RedOnion => Shallots => Sugar Beets
-  "(O)Cornucopia_BasilSeeds": [ 0, 0, 0, -2 ], // 30 => 15, c20 => 50
-  "(O)Cornucopia_OnionSeeds": [ 6, -6, 0, 0 ], // Converter, c80 => 60 
-  "(O)Cornucopia_VanillaSeeds": [ 20, 0, 10, 0 ], // Bush
+  "(O)Cornucopia_BasilSeeds": [ 0, 0, 0, -8 ], // 30 => 15, c20 => 50
+  "(O)Cornucopia_OnionSeeds": [ 8, -8, 0, 0 ], // Converter, c80 => 60 
+  "(O)Cornucopia_VanillaSeeds": [ 2, 0, 1, 0 ], // Bush
 
-  "(O)Cornucopia_AgaveSeeds": [ 6, 0, 0, 0 ], // cash crop, challenging amount of blue to muster up, c100 => 40
-  "(O)Cornucopia_AsparagusSeeds": [ 0, 3, 3, 0 ], // Cash crop, c60 => c40
-  "(O)Cornucopia_BuckwheatSeeds": [ -10, 0, 0, 0 ], // Cover crop, c10 => 40, 25 => 1, meant to be used in a mill.
-  "(O)Cornucopia_CabbageSeeds": [ 0, -4, 3, -1 ], // Converter
-  "(O)Cornucopia_CanaryMelonSeeds": [ 0, 4, 0, 0 ], // Cash crop c450 => 200
-  "(O)Cornucopia_CantaloupeSeeds": [ 0, 0, 3, 0 ], // Cash crop 180 => 220, c80 => 40
-  "(O)Cornucopia_JalapenoSeeds": [ 1, 0, -1, 0 ], // Slow chill Converter, 40 => 30
-  "(O)Cornucopia_PassionFruitSeeds": [ 2, 0, 2, 0 ], // Cash Crop 
-  "(O)Cornucopia_PintoBeansSeeds": [ 0, 0, -1, -1 ], // Slow Cover crop
-  "(O)Cornucopia_RedOnionSeeds": [ 0, 5, -5, 0 ], // Converter c80 => 60
-  "(O)Cornucopia_ShallotSeeds": [ 0, 0, 4, -4 ], // Converter c80 => 60
-  "(O)Cornucopia_SugarBeetSeeds": [ -12, 0, 0, 1 ], // Converter c100 => 80
+  "(O)Cornucopia_AgaveSeeds": [ 24, 0, 0, 0 ], // cash crop, challenging amount of blue to muster up, c100 => 40
+  "(O)Cornucopia_AsparagusSeeds": [ 0, 6, 6, 0 ], // Cash crop, c60 => c40
+  "(O)Cornucopia_BuckwheatSeeds": [ -8, 0, 0, 0 ], // Cover crop, c10 => 40, 25 => 1, meant to be used in a mill.
+  "(O)Cornucopia_CabbageSeeds": [ 0, -10, 4, 0 ], // Converter
+  "(O)Cornucopia_CanaryMelonSeeds": [ 0, 16, 0, 0 ], // Cash crop c450 => 200
+  "(O)Cornucopia_CantaloupeSeeds": [ 0, 0, 8, 0 ], // Cash crop 180 => 220, c80 => 40
+  "(O)Cornucopia_JalapenoSeeds": [ 12, 0, -10, 0 ], // Slow chill Converter, 40 => 30
+  "(O)Cornucopia_PassionFruitSeeds": [ 10, 0, 10, 0 ], // Cash Crop 
+  "(O)Cornucopia_PintoBeansSeeds": [ 0, 0, -6, -4 ], // Slow Cover crop
+  "(O)Cornucopia_RedOnionSeeds": [ 0, 8, -8, 0 ], // Converter c80 => 60
+  "(O)Cornucopia_ShallotSeeds": [ 0, 0, 8, -8 ], // Converter c80 => 60
+  "(O)Cornucopia_SugarBeetSeeds": [ -24, 0, 0, 4 ], // Converter c100 => 80
 
-  "(O)Cornucopia_CatnipSeeds": [ 0, -2, 0, -1 ], // Cover Crop c60 => 80
-  "(O)Cornucopia_DillSeeds": [ 0, 0, -3, 0 ], // Cover c50 => 70
-  "(O)Cornucopia_FenugreekSeeds": [ 4, 0, 0, 2 ], // Cash Crop 35 => 150
-  "(O)Cornucopia_LicoriceRootSeeds": [ 0, 0, 5, 0 ], //Cash Crop 135 => 350
-  "(O)Cornucopia_MarjoramSeeds": [ 0, -6, 0, 0 ], // Cover Crop c30 => 60
+  "(O)Cornucopia_CatnipSeeds": [ 0, -4, 0, -4 ], // Cover Crop c60 => 80
+  "(O)Cornucopia_DillSeeds": [ 0, 0, -8, 0 ], // Cover c50 => 70
+  "(O)Cornucopia_FenugreekSeeds": [ 16, 0, 0, 4 ], // Cash Crop 35 => 150
+  "(O)Cornucopia_LicoriceRootSeeds": [ 0, 0, 12, 0 ], //Cash Crop 135 => 350
+  "(O)Cornucopia_MarjoramSeeds": [ 0, -10, 0, 0 ], // Cover Crop c30 => 60
   "(O)Cornucopia_ParsleySeeds": [ 8, 0, -4, 0 ], // Converter
 
-  "(O)Cornucopia_MorningGlorySeeds": [ 0, 2, 0, 1 ], // Cash Crop, c240 => 120 
-  "(O)Cornucopia_PansySeeds": [ 0, 1, 1, 0 ], // Light Cash, 50 => 70
-  "(O)Cornucopia_PinkCatSeeds": [ 0, -4, -4, 2 ], // Converter, 30 => 50
+  "(O)Cornucopia_MorningGlorySeeds": [ 0, 8, 0, 4 ], // Cash Crop, c240 => 120 
+  "(O)Cornucopia_PansySeeds": [ 0, 4, 4, 0 ], // Light Cash, 50 => 70
+  "(O)Cornucopia_PinkCatSeeds": [ 0, -4, -8, 4 ], // Converter, 30 => 50
 
-  "(O)Cornucopia_BluebonnetSeeds": [ -2, -2, -2, 0 ], // Cover, c20 => 30, 30 => 20
-  "(O)Cornucopia_ChamomileSeeds": [ -6, 0, 0, 0 ], // Cover, c20 => 50
-  "(O)Cornucopia_HyacinthSeeds": [ -12, 0, 2, 0 ], // Convert
-  "(O)Cornucopia_LarkspurSeeds": [ 3, 3, 3, 0 ], // Cash 90 => 180
-  "(O)Cornucopia_PeonySeeds": [ 0, 2, 2, 2 ], // Cash 110 => 350
-  "(O)Cornucopia_VioletSeeds": [ 0, 10, 0, 0 ], // Cash Crop, 30 => 350
-  "(O)Cornucopia_CamelliaSeeds": [ 0, -20, 0, 0 ], // Bush, Cover? 90 => 50
+  "(O)Cornucopia_BluebonnetSeeds": [ -4, -6, -8, 0 ], // Cover, c20 => 30, 30 => 20
+  "(O)Cornucopia_ChamomileSeeds": [ -12, -8, 0, 0 ], // Cover, c20 => 50
+  "(O)Cornucopia_HyacinthSeeds": [ -16, 0, 4, 0 ], // Convert
+  "(O)Cornucopia_LarkspurSeeds": [ 6, 4, 2, 0 ], // Cash 90 => 180
+  "(O)Cornucopia_PeonySeeds": [ 0, 4, 4, 4 ], // Cash 110 => 350
+  "(O)Cornucopia_CamelliaSeeds": [ -4, -2, 0, 0 ], // Bush, Cover? 90 => 50
 
-  "(O)Cornucopia_RoseSpringSeeds": [ 6, 0, 0, 0 ], // Cash Crop, c200 => 100, 290 => 200
+  "(O)Cornucopia_RoseSpringSeeds": [ 24, 0, 0, 0 ], // Cash Crop, c200 => 100, 290 => 200
+  "(O)Cornucopia_VioletSeeds": [ 0, 4, 0, 0 ], // Cash Crop, 30 => 350
 
-  "(O)Cornucopia_MorelSeeds": [ 0, 0, 8, 0 ], // Bush, Cash Crop
-  "(O)Cornucopia_SalmonberrySeeds": [ 20, 0, 0, 0 ], // Bush, Cash c300 => 200, 15=> 25
+  "(O)Cornucopia_MorelSeeds": [ 0, 0, 2, 0 ], // Bush, Cash Crop
+  "(O)Cornucopia_SalmonberrySeeds": [ 2, 0, 0, 0 ], // Bush, Cash c300 => 200, 15=> 25
 
-  "(O)Cornucopia_CocoaPodSapling": [ 50, 0, 0, 0 ], // Tree, Cash c5000 => 1500 
+  "(O)Cornucopia_CocoaPodSapling": [ 3, -2, 0, 0 ], // Tree, Cash c5000 => 1500 
 
-  "(O)Cornucopia_BreadfruitSapling": [ 0, 0, 50, 0 ], // Tree, Cash c8000 => 2500
-  "(O)Cornucopia_LemonSapling": [ -50, 0, 0, 5 ], // Tree, Convert
-  "(O)Cornucopia_LimeSapling": [ 0, -50, 20, 0 ], // Tree, Convert
-  "(O)Cornucopia_EucalyptusLeavesSapling": [ -50, 0, 0, 0 ], // Tree, Cover 135 => 70
-  "(O)Cornucopia_MelaleucaLeavesSapling": [ 0, 0, -25, 0 ], // Tree, Cover c4000 => 6000, 100 => 60
+  "(O)Cornucopia_BreadfruitSapling": [ 0, 0, 2, 0 ], // Tree, Cash c8000 => 2500
+  "(O)Cornucopia_LemonSapling": [ -6, 0, 0, 1 ], // Tree, Convert
+  "(O)Cornucopia_LimeSapling": [ 0, -4, 2, 0 ], // Tree, Convert
+  "(O)Cornucopia_EucalyptusLeavesSapling": [ -4, 0, 0, 0 ], // Tree, Cover 135 => 70
+  "(O)Cornucopia_MelaleucaLeavesSapling": [ 0, 0, -1, 0 ], // Tree, Cover c4000 => 6000, 100 => 60
 
-  "(O)Cornucopia_MagnoliaSapling": [ 25, 25, 0, -12 ], // Tree, Convert
-  "(O)Cornucopia_WisteriaSapling": [ 0, 40, -25, 0 ], // Tree, Convert
+  "(O)Cornucopia_MagnoliaSapling": [ 1, 2, 0, -1 ], // Tree, Convert
+  "(O)Cornucopia_WisteriaSapling": [ 0, 2, -1, 0 ], // Tree, Convert
 
 
   // Spring + Summer
-  "(O)Cornucopia_BambooSeeds": [ 0, 4, 4, 0 ], // Cash, 65 => 130, c80 => 40
-  "(O)Cornucopia_CanolaFlowerSeeds": [ -2, 0, 0, 0 ], // Cover, can become oil for profit.
+  "(O)Cornucopia_BambooSeeds": [ 0, 8, 8, 0 ], // Cash, 65 => 130, c80 => 40
+  "(O)Cornucopia_CanolaFlowerSeeds": [ -8, -4, 0, 0 ], // Cover, can become oil for profit.
 
-  "(O)Cornucopia_CarnationSeeds": [ 0, 2, 0, -1 ], // Convert, easy converter 80 => 60
-  "(O)Cornucopia_HoneysuckleSeeds": [ 3, 2, 1, 0 ], // Longterm Cash, c240 => 120
-  "(O)Cornucopia_LilacSeeds": [ -12, -8, -4, 0 ], // Bush, Cover 80 => 60
+  "(O)Cornucopia_CarnationSeeds": [ 0, 8, 0, -6 ], // Convert, easy converter 80 => 60
+  "(O)Cornucopia_HoneysuckleSeeds": [ 18, 12, 6, 0 ], // Longterm Cash, c240 => 120
+  "(O)Cornucopia_LilacSeeds": [ -3, -2, -1, 0 ], // Bush, Cover 80 => 60
 
   // Spring + Fall
-  "(O)Cornucopia_CommonMushroomSeeds": [ 0, 12, -12, 0 ], // Bush, Convert
-  "(O)Cornucopia_SpinachSeeds": [ -6, 6, -4, 0 ], // Convert, c10 => 30, 35 => 55
+  "(O)Cornucopia_CommonMushroomSeeds": [ 0, 2, -2, 0 ], // Bush, Convert
 
-  "(O)Cornucopia_ShiitakeSeeds": [ 0, -16, 8, 0 ], // Bush, Convert c1000 => 500, 220 => 150
+  "(O)Cornucopia_SpinachSeeds": [ -8, 8, -4, 0 ], // Convert, c10 => 30, 35 => 55
+
+  "(O)Cornucopia_ShiitakeSeeds": [ 0, -4, 1, 0 ], // Bush, Convert c1000 => 500, 220 => 150
 
   // Spring + Summer + Fall
-  "(O)Cornucopia_PeppercornSeeds": [ 0, 8, 0, 0 ], // Bush, Light Cash
+  "(O)Cornucopia_PeppercornSeeds": [ 0, 2, 0, 0 ], // Bush, Light Cash
   "(O)Cornucopia_RoseSeeds": [ 0, 0, 0, 0 ], // Not Trellis :O  Simple Rose.  c200 => 100, 290 => 130
 
-  "(O)Cornucopia_RosePrismaticSeeds": [ 7, 6, 5, 4 ], // Challenging Cash, 1500 => 7500  
+  "(O)Cornucopia_RosePrismaticSeeds": [ 32, 28, 24, 20 ], // Challenging Cash, 1500 => 7500  
 
   // Spring + Winter :O
-  "(O)Cornucopia_GinsengSeeds": [ 0, 3, 2, 1 ], // Cash, 2600 => 4000
+  "(O)Cornucopia_GinsengSeeds": [ 24, 18, 12, 6 ], // Cash, 2600 => 4000
 
   // ALL
 
 
   // Summer
-  "(O)Cornucopia_GingerSeeds": [ 2, 0, 0, 0 ], // Light cash crop
-  "(O)Cornucopia_SweetPeaSeeds": [ 1, 1, 0, 0 ], // light cash crop
-  "(O)Cornucopia_RaspberrySeeds": [ 16, 8, 0, 0 ], // Bush, Cash Crop, 60 => 80
+  "(O)Cornucopia_GingerSeeds": [ 6, 0, 0, 0 ], // Light cash crop
+  "(O)Cornucopia_SweetPeaSeeds": [ 4, 4, 0, 0 ], // light cash crop
+  "(O)Cornucopia_RaspberrySeeds": [ 2, 1, 0, 0 ], // Bush, Cash Crop, 60 => 80
 
-  "(O)Cornucopia_BellPepperSeeds": [ 2, 2, 0, 0 ], // Cash, c130 => 80
-  "(O)Cornucopia_CucumberSeeds": [ 0, 2, 2, 0 ], // Cash
-  "(O)Cornucopia_KiwiSeeds": [ 4, 0, 0, 0 ], // Cash,  100 => 130
-  "(O)Cornucopia_LettuceSeeds": [ -10, 3, 0, 0 ], // Converter
-  "(O)Cornucopia_SugarcaneSeeds": [ 0, 4, 0, 0 ], // Cash 30 => 90
-  "(O)Cornucopia_WatermelonSeeds": [ 5, 0, 2, 0 ], // Cash c300 => 200
+  "(O)Cornucopia_BellPepperSeeds": [ 6, 6, 0, 0 ], // Cash, c130 => 80
+  "(O)Cornucopia_CucumberSeeds": [ 0, 6, 6, 0 ], // Cash
+  "(O)Cornucopia_KiwiSeeds": [ 14, 0, 0, 0 ], // Cash,  100 => 130
+  "(O)Cornucopia_LettuceSeeds": [ -10, 4, 0, 0 ], // Converter
+  "(O)Cornucopia_SugarcaneSeeds": [ 0, 8, 0, 0 ], // Cash 30 => 90
+  "(O)Cornucopia_WatermelonSeeds": [ 16, 0, 8, 0 ], // Cash c300 => 200
 
-  "(O)Cornucopia_AdzukiBeanSeeds": [ 2, 0, -2, 0 ], // Slow Converter 60 => 40
-  "(O)Cornucopia_BlueAgaveSeeds": [ 0, 3, 0, 1 ], // Cash, c180 => 50
-  "(O)Cornucopia_ButternutSquashSeeds": [ 0, 0, 3, 1 ], // Cash
-  "(O)Cornucopia_CassavaSeeds": [ 0, -7, 0, 0 ], // Cover c50 => 100
-  "(O)Cornucopia_ChickpeaSeeds": [ 0, -3, 1, 0 ], // Slow Converter 55 => 40 
-  "(O)Cornucopia_GreenPeasSeeds": [ 0, 3, 3, 0 ], // Challenging Cash 35 => 50
-  "(O)Cornucopia_HoneydewSeeds": [ 0, 0, -1, -2 ], // Cover c80 => 140, 180 =>80 
-  "(O)Cornucopia_NavyBeansSeeds": [ 0, 3, 0, -2 ], // Slow Converter
-  "(O)Cornucopia_QuinoaSeeds": [ 0, 0, -4, 0 ], // Cover c20 => 70
-  "(O)Cornucopia_WasabiRootSeeds": [ 0, 0, 0, 2 ], // Cash c100 => 50, 165 => 250
-  "(O)Cornucopia_BlackCurrantsSeeds": [ 40, 0, 0, 1 ], // Bush, Cash c850 => 300, 70 => 120
-  "(O)Cornucopia_GooseberrySeeds": [ 0, 0, -8, -5 ], // Bush, Cover 40 => 20
+  "(O)Cornucopia_AdzukiBeanSeeds": [ 8, 0, -8, 0 ], // Slow Converter 60 => 40
+  "(O)Cornucopia_BlueAgaveSeeds": [ 0, 8, 0, 4 ], // Cash, c180 => 50
+  "(O)Cornucopia_ButternutSquashSeeds": [ 0, 0, 8, 4 ], // Cash
+  "(O)Cornucopia_CassavaSeeds": [ 0, -12, 0, 0 ], // Cover c50 => 100
+  "(O)Cornucopia_ChickpeaSeeds": [ 0, -10, 4, 0 ], // Slow Converter 55 => 40 
+  "(O)Cornucopia_GreenPeasSeeds": [ 0, 10, 10, 0 ], // Challenging Cash 35 => 50
+  "(O)Cornucopia_HoneydewSeeds": [ 0, 0, -8, -12 ], // Cover c80 => 140, 180 =>80 
+  "(O)Cornucopia_NavyBeansSeeds": [ 0, 8, 0, -6 ], // Slow Converter
+  "(O)Cornucopia_QuinoaSeeds": [ 0, 0, -16, 0 ], // Cover c20 => 70
+  "(O)Cornucopia_WasabiRootSeeds": [ 0, 0, 2, 6 ], // Cash c100 => 50, 165 => 250
+  "(O)Cornucopia_BlackCurrantsSeeds": [ 4, 0, 0, 1 ], // Bush, Cash c850 => 300, 70 => 120
+  "(O)Cornucopia_GooseberrySeeds": [ 0, 0, -2, -1 ], // Bush, Cover 40 => 20
 
-  "(O)Cornucopia_AloeSeeds": [ -20, 1, 1, 1 ], // Convert c100 => 140
-  "(O)Cornucopia_ChivesSeeds": [ -8, 0, 0, 0 ], // Cover c20 => 30 
-  "(O)Cornucopia_LemongrassSeeds": [ 0, -3, -2, 0 ], // Cover c20 => 60
-  "(O)Cornucopia_OreganoSeeds": [ -4, -3, 0, 0 ], // Cover 50 => 30
-  "(O)Cornucopia_PerillaLeavesSeeds": [ 0, -3, 0, -1 ], // Cover c30 => 60
+  "(O)Cornucopia_AloeSeeds": [ -24, 6, 4, 2 ], // Convert c100 => 140
+  "(O)Cornucopia_ChivesSeeds": [ -12, 0, 0, 0 ], // Cover c20 => 30 
+  "(O)Cornucopia_LemongrassSeeds": [ 0, -10, -6, 0 ], // Cover c20 => 60
+  "(O)Cornucopia_OreganoSeeds": [ -8, -8, 0, 0 ], // Cover 50 => 30
+  "(O)Cornucopia_PerillaLeavesSeeds": [ 0, -8, 0, -4 ], // Cover c30 => 60
 
-  "(O)Cornucopia_BlueMistSeeds": [ 8, 2, -5, 0 ], // Convert
-  "(O)Cornucopia_LilySeeds": [ 5, 0, 0, 2 ], // Cash 90 => 300
-  "(O)Cornucopia_LotusSeeds": [ 0, 3, 0, 0 ], // Cash, 150 => 200
+  "(O)Cornucopia_BlueMistSeeds": [ 16, 8, -16, 0 ], // Convert
+  "(O)Cornucopia_LilySeeds": [ 12, 0, 0, 4 ], // Cash 90 => 300
+  "(O)Cornucopia_LotusSeeds": [ 0, 8, 0, 0 ], // Cash, 150 => 200
 
-  "(O)Cornucopia_ButtercupSeeds": [ 0, -5, 0, 0 ], // Cover c20 => 40
-  "(O)Cornucopia_ClarySageSeeds": [ 6, -1, -1, -1 ], // Convert, c20 => 40, 30 => 50 
-  "(O)Cornucopia_DaisySeeds": [ 0, 0, 0, -4 ], // Cover, Expensive c10 => 250
-  "(O)Cornucopia_HydrangeaSeeds": [ 6, 0, 0, 0 ], // Cash, 80 => 200
-  "(O)Cornucopia_LavenderSeeds": [ -5, 0, -2, 0 ], // Cover, c20 => 40
-  "(O)Cornucopia_LupineSeeds": [ -6, -3, 0, 0 ], // Cover, c30 => 40
-  "(O)Cornucopia_PetuniaSeeds": [ -8, -4, -2, 2 ], // Convert
-  "(O)Cornucopia_WolfsbaneSeeds": [ 4, 3, 2, 1 ], // Slow Cash, 140 => 500
-  "(O)Cornucopia_CalicoRoseSeeds": [ 8, 8, 8, 8 ], // Bush, Cash c1400 => 600, 400 => 500
+  "(O)Cornucopia_ButtercupSeeds": [ 0, -20, 0, 0 ], // Cover c20 => 40
+  "(O)Cornucopia_ClarySageSeeds": [ 24, -4, -4, -4 ], // Convert, c20 => 40, 30 => 50 
+  "(O)Cornucopia_DaisySeeds": [ 0, -20, 0, -20 ], // Cover, Expensive c10 => 250
+  "(O)Cornucopia_HydrangeaSeeds": [ 12, 0, 0, 0 ], // Cash, 80 => 200
+  "(O)Cornucopia_LavenderSeeds": [ -10, 0, -4, 0 ], // Cover, c20 => 40
+  "(O)Cornucopia_LupineSeeds": [ -12, -6, 0, 0 ], // Cover, c30 => 40
+  "(O)Cornucopia_PetuniaSeeds": [ -12, -8, -4, 4 ], // Convert
+  "(O)Cornucopia_WolfsbaneSeeds": [ 16, 12, 8, 4 ], // Slow Cash, 140 => 500
+  "(O)Cornucopia_CalicoRoseSeeds": [ 1, 1, 1, 1 ], // Bush, Cash c1400 => 600, 400 => 500
 
-  "(O)Cornucopia_RoseSummerSeeds": [ 0, 5, 0, 0 ], // Cash, c200 => 100, 290 => 300
+  "(O)Cornucopia_RoseSummerSeeds": [ 0, 24, 0, 0 ], // Cash, c200 => 100, 290 => 300
 
-  "(O)Cornucopia_CoconutSapling": [ -25, 30, -15, 0 ], // Tree, Convert
+  "(O)Cornucopia_CoconutSapling": [ 0, 2, -1, 0 ], // Tree, Convert
 
-  "(O)Cornucopia_AvocadoSapling": [ 0, 0, 36, 12 ], // Tree, Cash c8000 => 2000, 200 => 300
+  "(O)Cornucopia_AvocadoSapling": [ 0, 0, 1, 1 ], // Tree, Cash c8000 => 2000, 200 => 300
 
-  "(O)Cornucopia_DragonFruitSapling": [ 0, -24, -24, 12 ], // Tree, Convert c5000 => 4000
-  "(O)Cornucopia_DurianSapling": [ 0, 36, 24, 12 ], // Tree, Cash 350 => 400
-  "(O)Cornucopia_LycheeSapling": [ 0, -25, -12, 0 ], // Tree, Cover c5000 => 2000, 110 => 60
-  "(O)Cornucopia_NectarineSapling": [ 32, -32, 0, 0 ], // Tree, Convert c6000 => 3000, 140 => 90
-  "(O)Cornucopia_PapayaSapling": [ 0, 15, 0, 0 ], // Tree, Chill Cash, 135 => 70
-  "(O)Cornucopia_PlantainSapling": [ 25, 0, 25, 0 ], // Tree, Cash 175 => 260
-  "(O)Cornucopia_UmeSapling": [ -40, 0, 0, 0 ], // Tree, Cover 50 => 30, c2000 => 1500
-  "(O)Cornucopia_NutmegSapling": [ 0, 0, 0, -20 ], // Tree, Cover 90 => 50
+  "(O)Cornucopia_DragonFruitSapling": [ 0, -2, -2, 1 ], // Tree, Convert c5000 => 4000
+  "(O)Cornucopia_DurianSapling": [ 0, 1, 1, 1 ], // Tree, Cash 350 => 400
+  "(O)Cornucopia_LycheeSapling": [ 0, -2, -1, 0 ], // Tree, Cover c5000 => 2000, 110 => 60
+  "(O)Cornucopia_NectarineSapling": [ 2, -2, 0, 0 ], // Tree, Convert c6000 => 3000, 140 => 90
+  "(O)Cornucopia_PapayaSapling": [ -2, 2, 0, 0 ], // Tree, Chill Cash, 135 => 70
+  "(O)Cornucopia_PlantainSapling": [ 2, 0, 1, 0 ], // Tree, Cash 175 => 260
+  "(O)Cornucopia_UmeSapling": [ -2, 0, 0, 0 ], // Tree, Cover 50 => 30, c2000 => 1500
+  "(O)Cornucopia_NutmegSapling": [ 0, 0, 0, -1 ], // Tree, Cover 90 => 50
 
-  "(O)Cornucopia_HibiscusSapling": [ 0, 0, -25, 0 ], // Tree, Cover 75 => 50
-  "(O)Cornucopia_YlangYlangSapling": [ -25, -25, 25, 0 ], // Tree, Convert
+  "(O)Cornucopia_HibiscusSapling": [ 1, 1, -2, 0 ], // Tree, Cover 75 => 50
+  "(O)Cornucopia_YlangYlangSapling": [ -2, -2, 1, 0 ], // Tree, Convert
 
   // Summer + Fall
-  "(O)Cornucopia_CottonBollSeeds": [ 3, 2, 1, 0 ], // Cash, 80 => 100
+  "(O)Cornucopia_CottonBollSeeds": [ 12, 8, 4, 0 ], // Cash, 80 => 100
 
-  "(O)Cornucopia_GroundcherriesSeeds": [ 1, 2, 3, 0 ], // Challenging Cash 60 => 120
-  "(O)Cornucopia_OkraSeeds": [ 0, 3, 0, 0 ], // Light Cash, 
-  "(O)Cornucopia_ChickenoftheWoodsSeeds": [ 0, 16, -5, -5 ], // Bush, Convert c1200 => 800
+  "(O)Cornucopia_GroundcherriesSeeds": [ 6, 12, 18, 0 ], // Challenging Cash 60 => 120
+  "(O)Cornucopia_OkraSeeds": [ 0, 12, 0, 0 ], // Light Cash, 
+  "(O)Cornucopia_ChickenoftheWoodsSeeds": [ 0, 4, -1, -1 ], // Bush, Convert c1200 => 800
 
-  "(O)Cornucopia_OrchidSeeds": [ 12, -4, -3, -2 ], // Convert
+  "(O)Cornucopia_OrchidSeeds": [ 32, -8, -8, -8 ], // Convert
 
   // Fall
   // -- Left Circle of conversion {Celery, Oats, Durum, Barley} --
-  "(O)Cornucopia_PeanutSeeds": [ 3, 1, 1, 0 ], // Slow Cash 85 => 110
-  "(O)Cornucopia_Soybeans": [ 3, 0, 0, 0 ], // Cash, i don't understand this crop yet.
-  "(O)Cornucopia_TurnipSeeds": [ -10, 3, 0, 0 ], // Convert, 
-  "(O)Cornucopia_ZucchiniSeeds": [ 0, 0, 2, 0 ], // Cash, 
-  "(O)Cornucopia_OliveSeeds": [ 0, 0, 0, 0 ], // Bush
+  "(O)Cornucopia_PeanutSeeds": [ 12, 4, 4, 0 ], // Slow Cash 85 => 110
+  "(O)Cornucopia_Soybeans": [ 12, 0, 0, 0 ], // Cash, i don't understand this crop yet.
+  "(O)Cornucopia_TurnipSeeds": [ -12, 4, 0, 0 ], // Convert, 
+  "(O)Cornucopia_ZucchiniSeeds": [ 0, 0, 6, 0 ], // Cash, 
+  "(O)Cornucopia_OliveSeeds": [ 2, 0, 0, 0 ], // Bush
 
 
   "(O)Cornucopia_BarleySeeds": [ -16, 4, 0, 0 ], // Convert
-  "(O)Cornucopia_BlackBeansSeeds": [ 0, 3, 0, 0 ], // Cash 15 => 45
+  "(O)Cornucopia_BlackBeansSeeds": [ 0, 10, 0, 0 ], // Cash 15 => 45
   "(O)Cornucopia_CelerySeeds": [ 16, 0, 0, -4 ], // Convert, 45 => 60
-  "(O)Cornucopia_DaikonSeeds": [ 8, 0, -4, 0 ], // Convert
-  "(O)Cornucopia_DurumSeeds": [ 0, -12, 3, 0 ], // Convert
-  "(O)Cornucopia_HabaneroSeeds": [ 3, 0, 3, 0 ], // Cash, 120 => 200
-  "(O)Cornucopia_KidneyBeansSeeds": [ 1, 1, 0, 0 ], // Cash, c180 => 80
-  "(O)Cornucopia_OatsSeeds": [ 0, 0, -8, 2 ], // Convert
-  "(O)Cornucopia_SweetPotatoSeeds": [ 2, 2, 2, 0 ], // Cash c70 => 40
+  "(O)Cornucopia_DaikonSeeds": [ 12, 0, -6, 0 ], // Convert
+  "(O)Cornucopia_DurumSeeds": [ 0, -16, 4, 0 ], // Convert
+  "(O)Cornucopia_HabaneroSeeds": [ 8, 0, 8, 0 ], // Cash, 120 => 200
+  "(O)Cornucopia_KidneyBeansSeeds": [ 6, 6, 0, 0 ], // Cash, c180 => 80
+  "(O)Cornucopia_OatsSeeds": [ 0, 0, -16, 4 ], // Convert
+  "(O)Cornucopia_SweetPotatoSeeds": [ 4, 4, 4, 0 ], // Cash c70 => 40
 
-  "(O)Cornucopia_CilantroSeeds": [ 0, 0, -3, 0 ], // Cover c20 => 60 
-  "(O)Cornucopia_CuminSeeds": [ -8, 0, 0, 0 ], // Cover
-  "(O)Cornucopia_FennelSeeds": [ 0, -5, 0, 0 ], // Cover, c20 => 40
-  "(O)Cornucopia_RosemarySeeds": [ 0, 0, 0, -2 ], // Cover c30 => 80
-  "(O)Cornucopia_SageSeeds": [ -6, -3, 0, 0 ], // Cover 40 => 55
-  "(O)Cornucopia_TarragonSeeds": [ 0, 0, 2, 2 ], // Cash 60 => 150
-  "(O)Cornucopia_ThymeSeeds": [ 2, 6, 0, 0 ], // Cash 30 => 120
-  "(O)Cornucopia_TurmericSeeds": [ 0, 0, 5, 0 ], // Cash 100 => 220
+  "(O)Cornucopia_CilantroSeeds": [ 0, 0, -8, 0 ], // Cover c20 => 60 
+  "(O)Cornucopia_CuminSeeds": [ -24, 0, 0, 0 ], // Cover
+  "(O)Cornucopia_FennelSeeds": [ 0, -14, 0, 0 ], // Cover, c20 => 40
+  "(O)Cornucopia_RosemarySeeds": [ 0, 0, 0, -6 ], // Cover c30 => 80
+  "(O)Cornucopia_SageSeeds": [ -4, -4, 0, 0 ], // Cover 40 => 55
+  "(O)Cornucopia_TarragonSeeds": [ 0, 0, 4, 4 ], // Cash 60 => 150
+  "(O)Cornucopia_ThymeSeeds": [ 4, 12, 0, 0 ], // Cash 30 => 120
+  "(O)Cornucopia_TurmericSeeds": [ 0, 0, 10, 0 ], // Cash 100 => 220
 
-  "(O)Cornucopia_ChrysanthemumSeeds": [ 0, 2, 2, 0 ], // Cash 80 => 130
-  "(O)Cornucopia_IrisSeeds": [ 0, 0, 4, 0 ], // Cash 90 => 200
+  "(O)Cornucopia_ChrysanthemumSeeds": [ 0, 4, 4, 0 ], // Cash 80 => 130
+  "(O)Cornucopia_IrisSeeds": [ 6, 0, 6, 0 ], // Cash 90 => 200
 
-  "(O)Cornucopia_BeeBalmSeeds": [ 2, 2, -2, -2 ], // Convert c20 => 100, 30 => 90
-  "(O)Cornucopia_ClematisSeeds": [ 2, 0, 2, 1 ], // Challenging Cash, 110 => 140
-  "(O)Cornucopia_DahliaSeeds": [ -2, -1, -2, 0 ], // Cover c30 => 40
-  "(O)Cornucopia_FairyDusterSeeds": [ -6, -6, 1, 1 ], // convert c20 => 50 40 => 150
-  "(O)Cornucopia_FreesiaSeeds": [ 1, 1, 1, 0 ], // Light Cash, 80 => 110
-  "(O)Cornucopia_GeraniumSeeds": [ 6, 0, 0, 0 ], // Light Cash, 80 => 130 
-  "(O)Cornucopia_PitcherPlantSeeds": [ 0, 5, 0, 1 ], // Cash, 150 => 400
-  "(O)Cornucopia_PurpleConeflowerSeeds": [ 0, 0, 0, 0 ], // Convert
+  "(O)Cornucopia_BeeBalmSeeds": [ 4, 4, -4, -4 ], // Convert c20 => 100, 30 => 90
+  "(O)Cornucopia_ClematisSeeds": [ 8, 0, 8, 4 ], // Challenging Cash, 110 => 140
+  "(O)Cornucopia_DahliaSeeds": [ -8, -4, -4, 0 ], // Cover c30 => 40
+  "(O)Cornucopia_FairyDusterSeeds": [ -16, -16, 4, 4 ], // convert c20 => 50 40 => 150
+  "(O)Cornucopia_FreesiaSeeds": [ 2, 2, 2, 0 ], // Light Cash, 80 => 110
+  "(O)Cornucopia_GeraniumSeeds": [ 16, 0, 0, 0 ], // Light Cash, 80 => 130 
+  "(O)Cornucopia_PitcherPlantSeeds": [ 0, 20, 0, 4 ], // Cash, 150 => 400
+  "(O)Cornucopia_PurpleConeflowerSeeds": [ 4, 0, 0, 0 ], // Convert
 
-  "(O)Cornucopia_RoseFallSeeds": [ 0, 0, 4, 0 ], // Challenging Cash, c200 => 100, 300 => 400
+  "(O)Cornucopia_RoseFallSeeds": [ 0, 0, 20, 0 ], // Challenging Cash, c200 => 100, 300 => 400
 
-  "(O)Cornucopia_ChanterelleSeeds": [ -16, 16, -16, 0 ], // Bush, Convert
-  "(O)Cornucopia_BlackberrySeeds": [ 24, -16, -8, 0 ], // Bush, Convert
-  "(O)Cornucopia_WhiteGrapeSeeds": [ 4, 4, 4, 4 ], // Bush Cash, c600 => 400, 80 => 120
+  "(O)Cornucopia_ChanterelleSeeds": [ -2, 2, -2, 0 ], // Bush, Convert
+  "(O)Cornucopia_BlackberrySeeds": [ 6, -4, -2, 0 ], // Bush, Convert
+  "(O)Cornucopia_WhiteGrapeSeeds": [ 0, 1, 1, 1 ], // Bush Cash, c600 => 400, 80 => 120
 
-  "(O)Cornucopia_HazelnutSapling": [ 24, 12, -24, 0 ], // Tree, Convert c3500 => 2250, 90 =>70 
+  "(O)Cornucopia_HazelnutSapling": [ 2, 2, -2, 0 ], // Tree, Convert c3500 => 2250, 90 =>70 
 
-  "(O)Cornucopia_PistachioSapling": [ -96, 48, 0, 0 ], // Tree, Convert c3750 =>2500, 90 =>70
+  "(O)Cornucopia_PistachioSapling": [ -4, 2, 0, 0 ], // Tree, Convert c3750 =>2500, 90 =>70
 
-  "(O)Cornucopia_AlmondSapling": [ 96, 0, 0, -24 ], // Tree, Convert c3750 =>2500, 90 =>70
-  "(O)Cornucopia_CashewSapling": [ 0, -48, 24, 0 ], // Tree, Convert c4000 =>3000, 100 =>80
-  "(O)Cornucopia_GrapefruitSapling": [ 12, 12, 12, 12 ], // Tree, Cash c6000 => 1500, 140 => 200
-  "(O)Cornucopia_PecanSapling": [ 0, 0, -48, 24 ], // Tree, Convert c5000 => 3000, 125 => 110
-  "(O)Cornucopia_PomeloSapling": [ 36, 36, 0, 0 ], // Tree, Cash c3400 => 1200, 80 => 100
-  "(O)Cornucopia_WalnutSapling": [ 0, 24, 12, -24 ], // Tree, Convert c3750 => 2500, 90 => 70
+  "(O)Cornucopia_AlmondSapling": [ 2, 0, 0, -2 ], // Tree, Convert c3750 =>2500, 90 =>70
+  "(O)Cornucopia_CashewSapling": [ 0, -2, 1, 0 ], // Tree, Convert c4000 =>3000, 100 =>80
+  "(O)Cornucopia_GrapefruitSapling": [ 1, 1, 1, 1 ], // Tree, Cash c6000 => 1500, 140 => 200
+  "(O)Cornucopia_PecanSapling": [ 0, 0, -2, 1 ], // Tree, Convert c5000 => 3000, 125 => 110
+  "(O)Cornucopia_PomeloSapling": [ 2, 1, 0, 0 ], // Tree, Cash c3400 => 1200, 80 => 100
+  "(O)Cornucopia_WalnutSapling": [ 0, 2, 1, -2 ], // Tree, Convert c3750 => 2500, 90 => 70
 
-  "(O)Cornucopia_JasmineSapling": [ -36, 0, -24, 0 ], // Tree, Cover c =>more
+  "(O)Cornucopia_JasmineSapling": [ -2, -1, -1, 0 ], // Tree, Cover c =>more
 
   // Winter
-  "(O)Cornucopia_CrocusSeeds": [ 8, -3, -2, -1 ], // Convert 60 => 100
+  "(O)Cornucopia_CrocusSeeds": [ 12, -12, 4, -4 ], // Convert 60 => 100
 
-  "(O)Cornucopia_ElderberriesSeeds": [ 4, -4, 4, -4 ], // Bush, Slow Convert
-  "(O)Cornucopia_JuniperBerriesSeeds": [ -16, 0, -8, 0 ], // Bush, Cover, 24 => 15 
+  "(O)Cornucopia_ElderberriesSeeds": [ 2, -2, 2, -2 ], // Bush, Slow Convert
+  "(O)Cornucopia_JuniperBerriesSeeds": [ -4, 0, -2, 0 ], // Bush, Cover, 24 => 15 
 
-  "(O)Cornucopia_MintSeeds": [ -4, -4, 0, 0 ], // Cover c30 => 50
-  "(O)Cornucopia_WormwoodSeeds": [ 0, 0, -2, -2 ], // Cover c100 => 150
-  "(O)Cornucopia_BayLeavesSeeds": [ 0, 16, 8, 0 ], // Bush, Cash c650 => 200, 30 =>
+  "(O)Cornucopia_MintSeeds": [ -8, -8, 0, 0 ], // Cover c30 => 50
+  "(O)Cornucopia_WormwoodSeeds": [ 0, 0, -4, -4 ], // Cover c100 => 150
+  "(O)Cornucopia_BayLeavesSeeds": [ 0, 2, 1, 0 ], // Bush, Cash c650 => 200, 30 =>
 
-  "(O)Cornucopia_RoseWinterSeeds": [ 0, 0, 0, 3 ], // Cash Crop, c200 => 100, 290 => 500   
+  "(O)Cornucopia_RoseWinterSeeds": [ 0, 0, 0, 16 ], // Cash Crop, c200 => 100, 290 => 500   
 
-  "(O)Cornucopia_HollySeeds": [ 16, 16, 0, 0 ], // Bush, Cash c1000 => 300, 80 => 120 
+  "(O)Cornucopia_HollySeeds": [ 2, 2, 0, 0 ], // Bush, Cash c1000 => 300, 80 => 120 
 
-  "(O)Cornucopia_PearSapling": [ 48, -48, 0, 0 ], // Tree, Convert
+  "(O)Cornucopia_PearSapling": [ 2, -4, 0, 0 ], // Tree, Convert
 
-  "(O)Cornucopia_FigSapling": [ 0, 36, -36, 0 ], // Tree, Convert
-  "(O)Cornucopia_PersimmonSapling": [ 0, 0, 24, 24 ], // Tree, Cash c7000 => 2500, 155 => 350
-  "(O)Cornucopia_YuzuSapling": [ -10, -10, -10, -10 ], // Tree, Slow Cover, c2000 => 3000, 40 => 30, slow but quite useful.
-  "(O)Cornucopia_CamphorLeavesSapling": [ 0, 0, 24, -24 ], // Tree, Convert
-  "(O)Cornucopia_CinnamonSticksSapling": [ -96, 0, 0, 12 ], // Tree, Convert
+  "(O)Cornucopia_FigSapling": [ 0, 2, -3, 0 ], // Tree, Convert
+  "(O)Cornucopia_PersimmonSapling": [ 0, 0, 1, 2 ], // Tree, Cash c7000 => 2500, 155 => 350
+  "(O)Cornucopia_YuzuSapling": [ -1, -1, -1, -1 ], // Tree, Slow Cover, c2000 => 3000, 40 => 30, slow but quite useful.
+  "(O)Cornucopia_CamphorLeavesSapling": [ 0, 0, 2, -2 ], // Tree, Convert
+  "(O)Cornucopia_CinnamonSticksSapling": [ -6, 0, 0, 1 ], // Tree, Convert
 
   // NONE (ginger island or greenhouse only)
-  "(O)Cornucopia_RafflesiaSeeds": [ 5, 4, 3, 2 ], // Cash, 2400 => 5000
+  "(O)Cornucopia_RafflesiaSeeds": [ 4, 8, 12, 16 ], // Cash, 2400 => 5000
 
 
 
   ///// OPTIONAL, These are added for compatibility sake.  They will not be the main focus of balancing.
   // Spring
-  "(O)Rafseazz.RSVCP_Cherry_Pluot_Sapling": [ 0, 0, 0, 0 ], // Tree
-  "(O)Rafseazz.RSVCP_Mountain_Plumcot_Sapling": [ 0, 0, 0, 0 ], // Tree
-  "(O)LASV_Eggroot_Seeds": [ 0, 0, 0, 0 ],
-  "(O)LASV_Pale_Berry_Seeds": [ 0, 0, 0, 0 ],
-  "(O)LASV_Umuwi_Rambutan_Sapling": [ 0, 0, 0, 0 ], // Tree
-  "(O)FlashShifter.StardewValleyExpandedCP_Slime_Seed": [ 0, 0, 0, 0 ],
+  "(O)Rafseazz.RSVCP_Cherry_Pluot_Sapling": [ -1, -1, 0, 0 ], // Tree
+  "(O)Rafseazz.RSVCP_Mountain_Plumcot_Sapling": [ 2, 0, -3, 0 ], // Tree
+  "(O)LASV_Eggroot_Seeds": [ 0, -6, -6, 0 ],
+  "(O)LASV_Pale_Berry_Seeds": [ 0, 12, 0, 8 ],
+  "(O)LASV_Umuwi_Rambutan_Sapling": [ 1, 0, 1, -1 ], // Tree
+  "(O)FlashShifter.StardewValleyExpandedCP_Slime_Seed": [ 0, 0, 8, 0 ],
 
   // Spring + Summer
-  "(O)FlashShifter.StardewValleyExpandedCP_Shrub_Seed": [ 0, 0, 0, 0 ],
+  "(O)FlashShifter.StardewValleyExpandedCP_Shrub_Seed": [ 20, 20, 0, 0 ],
 
   // Spring + Summer + Fall
-  "(O)FlashShifter.StardewValleyExpandedCP_Joja_Berry_Starter": [ 0, 0, 0, 0 ],
-  "(O)FlashShifter.StardewValleyExpandedCP_Joja_Veggie_Seeds": [ 0, 0, 0, 0 ],
+  "(O)FlashShifter.StardewValleyExpandedCP_Joja_Berry_Starter": [ 16, 16, 16, 16 ],
+  "(O)FlashShifter.StardewValleyExpandedCP_Joja_Veggie_Seeds": [ 10, 10, 10, 10 ],
 
   // ALL
 
   // Summer
-  "(O)Rafseazz.RSVCP_Desert_Tangelo_Sapling": [ 0, 0, 0, 0 ], // Tree
-  "(O)Rafseazz.RSVCP_Paradise_Rangpur_Sapling": [ 0, 0, 0, 0 ], // Tree
-  "(O)Rafseazz.RSVCP_Tropi_Ugli_Fruit_Sapling": [ 0, 0, 0, 0 ], // Tree
-  "(O)LASV_Sour_Potato_Seeds": [ 0, 0, 0, 0 ],
-  "(O)LASV_Thorn_Pepper_Seeds": [ 0, 0, 0, 0 ],
-  "(O)LASV_Umuwi_Lanzones_Sapling": [ 0, 0, 0, 0 ], // Tree
-  "(O)FlashShifter.StardewValleyExpandedCP_Ancient_Ferns_Seed": [ 0, 0, 0, 0 ],
-  "(O)FlashShifter.StardewValleyExpandedCP_Stalk_Seed": [ 0, 0, 0, 0 ],
+  "(O)Rafseazz.RSVCP_Desert_Tangelo_Sapling": [ 0, -3, 1, 0 ], // Tree
+  "(O)Rafseazz.RSVCP_Paradise_Rangpur_Sapling": [ 2, -2, -1, 0 ], // Tree
+  "(O)Rafseazz.RSVCP_Tropi_Ugli_Fruit_Sapling": [ -2, 3, -1, 0 ], // Tree
+  "(O)LASV_Sour_Potato_Seeds": [ -4, -4, -8, 0 ],
+  "(O)LASV_Thorn_Pepper_Seeds": [ 0, 0, 4, 4 ],
+  "(O)LASV_Umuwi_Lanzones_Sapling": [ 0, 2, 0, -1 ], // Tree
+  "(O)FlashShifter.StardewValleyExpandedCP_Ancient_Ferns_Seed": [ 2, 4, 6, 8 ],
+  "(O)FlashShifter.StardewValleyExpandedCP_Stalk_Seed": [ 4, 16, 16, 4 ],
 
 
   // Summer + Fall
 
   // Fall
-  "(O)Rafseazz.RSVCP_Ember_Blood_Lime_Sapling": [ 0, 0, 0, 0 ], // Tree
-  "(O)Rafseazz.RSVCP_Highland_Jostaberry_Sapling": [ 0, 0, 0, 0 ], // Tree
-  "(O)Rafseazz.RSVCP_Northern_Limequat_Sapling": [ 0, 0, 0, 0 ], // Tree
-  "(O)LASV_Ghost_Cabbage_Seeds": [ 0, 0, 0, 0 ],
-  "(O)FlashShifter.StardewValleyExpandedCP_Fungus_Seed": [ 0, 0, 0, 0 ],
+  "(O)Rafseazz.RSVCP_Ember_Blood_Lime_Sapling": [ 4, 0, -2, 0 ], // Tree
+  "(O)Rafseazz.RSVCP_Highland_Jostaberry_Sapling": [ 0, 1, 1, 0 ], // Tree
+  "(O)Rafseazz.RSVCP_Northern_Limequat_Sapling": [ 0, 1, 0, 0 ], // Tree
+  "(O)LASV_Ghost_Cabbage_Seeds": [ 6, 0, 6, 0 ],
+  "(O)FlashShifter.StardewValleyExpandedCP_Fungus_Seed": [ 10, 10, 6, 6 ],
 
   // Winter
-  "(O)FlashShifter.StardewValleyExpandedCP_Void_Seed": [ 0, 0, 0, 0 ]
+  "(O)FlashShifter.StardewValleyExpandedCP_Void_Seed": [ 0, 0, 0, 6 ]
 
 
   //// Cornucopia - More Crops - Essential

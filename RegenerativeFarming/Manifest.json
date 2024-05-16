@@ -1,7 +1,7 @@
 {
   "Name": "Regenerative Agriculture",
   "Author": "Juicyslew",
-  "Version": "0.0.1",
+  "Version": "0.1.0",
   "Description": "Adds a soil health game mechanic.",
   "UniqueID": "Juicyslew.RegenerativeAgriculture",
   "EntryDll": "RegenerativeAgriculture.dll",

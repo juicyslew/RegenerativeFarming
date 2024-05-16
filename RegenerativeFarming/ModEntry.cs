@@ -34,6 +34,7 @@ using Force.DeepCloner;
 using StardewMods.CustomBush;
 using StardewValley.GameData.Crops;
 using static HarmonyLib.Code;
+using StardewValley.GameData.Tools;
 
 namespace RegenerativeAgriculture
 {
@@ -126,6 +127,8 @@ namespace RegenerativeAgriculture
         public Texture2D aoe_icons;
         public Texture2D caution_icons;
         public Texture2D health_bars;
+        int seed_shop_random_seed;
+        double pierre_shop_stock_percentage = .6;
 
         /*********
         ** Public methods
@@ -140,6 +143,9 @@ namespace RegenerativeAgriculture
 
         public override void Entry(IModHelper helper)
         {
+            // Default to randomly generated number just in case.
+            seed_shop_random_seed = Game1.random.Next();
+
             instance = this;
             helper.Events.GameLoop.DayEnding += OnDayEnd;
             helper.Events.Display.RenderedHud += OnRenderedHud;
@@ -195,9 +201,6 @@ namespace RegenerativeAgriculture
             shared_data.ResetData();
         }
 
-        
-
-
         private void Content_AssetRequested(object sender, AssetRequestedEventArgs e)
         {
             if (e.NameWithoutLocale.IsEquivalentTo($"{ModManifest.UniqueID}/SoilSurveyor"))
@@ -212,11 +215,31 @@ namespace RegenerativeAgriculture
                             {
                                 TextureIndex = i*7 + 5, // TODO: tmp
                                 DisplayName = surveyor_tool_names[i],
-                                Description = surveyor_tool_descriptions[i]
+                                Description = surveyor_tool_descriptions[i],
+                                UpgradeLevel = i
                             });
                     }
                     return ret;
                 }, StardewModdingAPI.Events.AssetLoadPriority.Exclusive);
+            }
+            else if (e.NameWithoutLocale.IsEquivalentTo("Data/Tools")) 
+            {
+                //e.Edit((asset) =>
+                //{
+                //    var data = asset.AsDictionary<string, ToolData>().Data;
+                //    for (int i = 0; i < 5; ++i)
+                //    {
+
+                //        ToolData td = new ToolData();
+                //        td.UpgradeLevel = i;
+                //        td.DisplayName = surveyor_tool_names[i];
+                //        td.CanBeLostOnDeath = false;
+                //        td.ApplyUpgradeLevelToDisplayName = false;
+                //        td.ConventionalUpgradeFrom = (i == 0) ? null : $"SoilSurveyor.T{i - 1}";
+                //        td.ClassName = "SoilSurveyor";
+                //        data.Add($"SoilSurveyor.T{i}", td);
+                //    }
+                //});
             }
             else if (e.NameWithoutLocale.IsEquivalentTo($"{ModManifest.UniqueID}/soil_surveyor_placeholder.png"))
             {
@@ -227,14 +250,6 @@ namespace RegenerativeAgriculture
                 e.Edit((asset) =>
                 {
                     var data = asset.AsDictionary<string, SpaceCore.VanillaAssetExpansion.ObjectExtensionData>().Data;
-                });
-            }
-            else if (e.NameWithoutLocale.IsEquivalentTo("Data/Objects"))
-            {
-                e.Edit((asset) =>
-                {
-                    var data = asset.AsDictionary<string, ObjectData>().Data;
-                    int i = 0;
                 });
             }else if (e.NameWithoutLocale.IsEquivalentTo($"{ModManifest.UniqueID}/2x_soil_measure_icons.png"))
             {
@@ -250,6 +265,19 @@ namespace RegenerativeAgriculture
             else if (e.NameWithoutLocale.IsEquivalentTo($"{ModManifest.UniqueID}/health_bars_2.png"))
             {
                 e.LoadFromModFile<Texture2D>("assets/health_bars_2.png", StardewModdingAPI.Events.AssetLoadPriority.Low);
+            }else if (e.NameWithoutLocale.IsEquivalentTo("Data/Shops"))
+            {
+                e.Edit((asset) =>
+                {
+                    var data = asset.AsDictionary<string, ShopData>().Data;
+                    var seedshop = data["SeedShop"];
+                    // Determine if object should stay or not based on a saved random number.
+                    Random random = new Random(seed_shop_random_seed);
+                    int total_count = seedshop.Items.Count;
+                    int removed_count = seedshop.Items.RemoveAll(x => shared_data.crop_diet_dict.Keys.Contains(x.ItemId) && random.NextDouble() > pierre_shop_stock_percentage);
+                    this.Monitor.Log($"Removed {removed_count} out of {total_count} items from the seed shop for this week.", LogLevel.Debug);
+                    data["SeedShop"] = seedshop;
+                });
             }
             //else if (e.NameWithoutLocale.IsEquivalentTo("Data/Shops"))
             //{
@@ -332,7 +360,7 @@ namespace RegenerativeAgriculture
         private void OnSaving(object? sender, SavingEventArgs e)
         {
             // Write surveyed_tiles to save data
-
+            Game1.getFarm().modData["juicyslew.regenerative_agriculture_seed_shop_random_seed"] = seed_shop_random_seed.ToString();
             foreach (GameLocation location in shared_data.soil_health_data.Keys)
             {
                 location.modData["juicyslew.regenerative_agriculture_soil_health_data"] = string.Join(";", shared_data.soil_health_data[location].Select(kv => $"{kv.Key.X},{kv.Key.Y}|{string.Join(',', kv.Value)}"));
@@ -345,6 +373,10 @@ namespace RegenerativeAgriculture
 
         private void OnSaveLoaded(object? sender, SaveLoadedEventArgs e)
         {
+            if (Game1.getFarm().modData.ContainsKey("juicyslew.regenerative_agriculture_seed_shop_random_seed"))
+            {
+                seed_shop_random_seed = int.Parse(Game1.getFarm().modData["juicyslew.regenerative_agriculture_seed_shop_random_seed"]);
+            }
             foreach (GameLocation location in Game1.locations)
             {
                 if (location.modData.ContainsKey("juicyslew.regenerative_agriculture_soil_health_data"))
@@ -377,6 +409,12 @@ namespace RegenerativeAgriculture
 
         private void OnDayEnd(object? sender, DayEndingEventArgs e)
         {
+            // Generate new shop seed
+            if (Game1.dayOfMonth % 7 == 0)
+            {
+                seed_shop_random_seed = Game1.random.Next();
+            }
+
             foreach (GameLocation location in Game1.locations)
             {
                 if (shared_data.soil_health_data.ContainsKey(location))
@@ -462,22 +500,18 @@ namespace RegenerativeAgriculture
                     {
                         TerrainFeature t = current_location.terrainFeatures[Game1.currentCursorTile];
                         string crop_id = null;
-                        bool eating = false;
                         // Update Cached next soil health map.
-                        if (t is Tree tree)
-                        {
-                            WildTreeData tree_data = tree.GetData();
-                            crop_id = tree_data.SeedItemId;
-                            eating = shared_data.IsTreeEating(tree);
-                        }
-                        else if (t is FruitTree fruit_tree){
+                        //if (t is Tree tree)
+                        //{
+                        //    WildTreeData tree_data = tree.GetData();
+                        //    crop_id = tree_data.SeedItemId;
+                        //}
+                        if (t is FruitTree fruit_tree){
                             crop_id = $"(O){fruit_tree.treeId.Value}";
-                            eating = shared_data.IsFruitTreeEating(fruit_tree);
                         }
                         else if (t is HoeDirt hoe_dirt && hoe_dirt.crop != null)
                         {
                             crop_id = $"(O){hoe_dirt.crop.netSeedIndex.Value}";
-                            eating = shared_data.IsCropEating(hoe_dirt) == EatMode.OnlyTake;
                         }
                         else if (t is Bush bush)
                         {
@@ -498,7 +532,6 @@ namespace RegenerativeAgriculture
                                     crop_id = "(O)251";
                                 }
                             }
-                            eating = shared_data.IsBushEating(bush);
                         }
                         
 

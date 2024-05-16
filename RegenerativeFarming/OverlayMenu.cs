@@ -132,7 +132,8 @@ namespace RegenerativeAgriculture
                         danger_tiles.Add(tile);
                     }
                 }
-                else if (current_location.doesTileHaveProperty((int)tile.X, (int)tile.Y, "Diggable", "Back") == "T")
+                // This code makes only diggable tiles displays unknown color.  Unfortunately farm mods often make more things diggable and I can't correctly detect that yet.
+                else if (current_location.doesTileHaveProperty((int)tile.X, (int)tile.Y, "Diggable", "Back") != null)
                 {
                     disp_color = unknown_color;
                 }
@@ -156,7 +157,7 @@ namespace RegenerativeAgriculture
             int radius = -1;
             if (mouse_terrain is not null)
             {
-                if (mouse_terrain is Tree || mouse_terrain is FruitTree)
+                if (mouse_terrain is FruitTree)  // mouse_terrain is Tree || mouse_terrain is FruitTree)
                 {
                     radius = 2;
                 }

@@ -34,7 +34,7 @@ namespace RegenerativeAgriculture
         private static SharedData instance;
         private ModEntry mod_entry;
         public const int max_health = 32;
-        public static int[] max_initial_health = new int[] {20, 14, 10, 8 };
+        public static int[] max_initial_health = new int[] { 16, 12, 8, 4 };
         public const float death_chance_per_missing_nutrient = .05f;
 
         public Color[] measure_colors;
@@ -68,13 +68,13 @@ namespace RegenerativeAgriculture
             soil_health_data[location] = new();
             double[] rarity = new double[]
             {   // Cannot input 0.
+                2,
                 3,
-                4,
-                6,
-                9
+                5,
+                8
             };
             double scale = 7; // Determines the scale of the waves, bigger number = larger slower changing soil health surface.
-            double extremity = .7f;  // Based on testing, .65 - .7 is good for getting a 0-1 range, but making it higher will allow for more extreme values.
+            double extremity = .72f;  // Based on testing, .65 - .7 is good for getting a 0-1 range, but making it higher will allow for more extreme values.
             double center_offset = .05;
             Perlin[] noises = new Perlin[]
             {
@@ -246,13 +246,14 @@ namespace RegenerativeAgriculture
 
             // Remove irrelevant features.
             t_features = t_features.Where(x =>
-                (x is Tree tree && IsTreeEating(tree)) ||
-                (x is FruitTree fruitTree && IsFruitTreeEating(fruitTree)) ||
-                (x is Bush bush && IsBushEating(bush)) ||
-                (x is HoeDirt hoeDirt && IsCropEating(hoeDirt) != EatMode.None));
+                //(x is Tree tree && GetTreeEatMode(tree) != EatMode.None) ||
+                (x is FruitTree fruitTree && GetFruitTreeEatMode(fruitTree) != EatMode.None) ||
+                (x is Bush bush && GetBushEatMode(bush) != EatMode.None) ||
+                (x is HoeDirt hoeDirt && GetCropEatMode(hoeDirt) != EatMode.None)
+            );
 
             // Sort so that Trees are first, then bushes, then crops
-            t_features = t_features.OrderBy(x => (x is Tree || x is FruitTree) ? 0 : (x is Bush) ? 1 : 2);
+            t_features = t_features.OrderBy(x => (x is FruitTree) ? 0 : (x is Bush) ? 1 : 2);
 
             // Calculate Regenerative effects
             ComputeDietEffects(data_store, t_features, EatMode.OnlyGive);
@@ -285,13 +286,14 @@ namespace RegenerativeAgriculture
 
             // Remove irrelevant features.
             t_features = t_features.Where(x =>
-                (x is Tree tree && IsTreeEating(tree, days_until_monday)) ||
-                (x is FruitTree fruitTree && IsFruitTreeEating(fruitTree, days_until_monday)) ||
-                (x is Bush bush && IsBushEating(bush, days_until_monday))||
-                (x is HoeDirt hoeDirt && IsCropEating(hoeDirt, days_until_monday) != EatMode.None));
+                //(x is Tree tree && GetTreeEatMode(tree, days_until_monday) != EatMode.None) ||
+                (x is FruitTree fruitTree && GetFruitTreeEatMode(fruitTree, days_until_monday) != EatMode.None) ||
+                (x is Bush bush && GetBushEatMode(bush, days_until_monday) != EatMode.None) ||
+                (x is HoeDirt hoeDirt && GetCropEatMode(hoeDirt, days_until_monday) != EatMode.None)
+            );
 
             // Sort so that Trees are first, then bushes, then crops
-            t_features = t_features.OrderBy(x => (x is Tree || x is FruitTree) ? 0 : (x is Bush) ? 1 : 2);
+            t_features = t_features.OrderBy(x => (x is FruitTree) ? 0 : (x is Bush) ? 1 : 2);
             // Calculate Regenerative effects
             ComputeDietEffects(data_store, t_features, EatMode.OnlyGive, check_days: days_until_monday);
 
@@ -302,32 +304,72 @@ namespace RegenerativeAgriculture
             SetDeathPreview(data_store); // , t_features);
         }
 
-        public bool IsTreeEating(Tree tree, int check_days = 1)
+        //public EatMode GetTreeEatMode(Tree tree, int check_days = 1)
+        //{
+        //    int indexOfMonth = Game1.dayOfMonth - 1;
+        //    if (tree.stump.Value || indexOfMonth / 7 == (indexOfMonth + check_days) / 7)
+        //    {
+        //        // If this tree is a stump or if the check_days doesn't cross a week boundary
+        //        return EatMode.None;
+        //    }
+        //    // If the tree is too young put it in take mode, other do all
+        //    if (tree.)
+
+        //    return !tree.stump.Value && ; ;
+        //}
+
+        public EatMode GetFruitTreeEatMode(FruitTree fruitTree, int check_days = 1)
         {
             int indexOfMonth = Game1.dayOfMonth - 1;
-            return !tree.stump.Value && indexOfMonth / 7 != (indexOfMonth + check_days) / 7; ;
+            if (fruitTree.stump.Value || indexOfMonth / 7 == (indexOfMonth + check_days) / 7)
+            {
+                // If this tree is a stump or if the check_days doesn't cross a week boundary
+                return EatMode.None;
+            }
+            
+            // growthRate should be 1 at all times??
+            if ((fruitTree.daysUntilMature.Value / fruitTree.growthRate.Value) < check_days)
+            {
+                return EatMode.All;
+            }
+            else
+            {
+                return EatMode.OnlyTake;
+            }
         }
 
-        public bool IsFruitTreeEating(FruitTree fruitTree, int check_days = 1)
+        public EatMode GetBushEatMode(Bush bush, int check_days = 1)
         {
-
             int indexOfMonth = Game1.dayOfMonth - 1;
-            return !fruitTree.stump.Value && indexOfMonth / 7 != (indexOfMonth + check_days) / 7; // && (fruitTree.growthStage.Value != 4 || fruitTree.IsInSeasonHere());
+            if (indexOfMonth / 7 == (indexOfMonth + check_days) / 7)
+            {
+                // If this tree is a stump or if the check_days doesn't cross a week boundary
+                return EatMode.None;
+            }
+
+            ICustomBush? customBush = null;
+            ModEntry.instance.customBushApi.TryGetCustomBush(bush, out customBush);
+            int days_till_grown;
+            if (customBush is not null)
+            {
+                days_till_grown = customBush.AgeToProduce - bush.getAge();
+            }
+            else
+            {
+                days_till_grown = 20 - bush.getAge();
+            }
+
+            if (days_till_grown < 0)
+            {
+                return EatMode.All;
+            }
+            else
+            {
+                return EatMode.OnlyTake;
+            }
         }
 
-        public bool IsBushEating(Bush bush, int check_days = 1)
-        {
-            // This checks if the bush is currently growing or in season or sheltered.
-            // Integer division to determine if these two days are not in the same week.
-            int indexOfMonth = Game1.dayOfMonth - 1;
-            return indexOfMonth / 7 != (indexOfMonth + check_days) / 7;
-            //Season season = Game1.season;
-            //int dayOfMonth = Game1.dayOfMonth;
-            //List<Season> allowed_season = customBush?.Seasons ?? new List<Season> { Season.Spring, Season.Summer, Season.Fall };
-            //return bush.getAge() < (customBush?.AgeToProduce ?? 20) || (allowed_season.Contains(season) || bush.IsSheltered());
-        }
-
-        public EatMode IsCropEating(HoeDirt hoeDirt, int check_days = 1)
+        public EatMode GetCropEatMode(HoeDirt hoeDirt, int check_days = 1)
         {
             Crop crop = hoeDirt.crop;
             bool taking = false;
@@ -382,25 +424,27 @@ namespace RegenerativeAgriculture
             // RECORD ALL THE EFFECTS OF TREES AND CROPS
             foreach (TerrainFeature t in t_features)
             {
-                if (t is Tree tree)
+                //if (t is Tree tree)
+                //{
+                //    if (GetTreeEatMode(tree, check_days))  // Should find a way to not be calculating this twice.
+                //    {
+                //        int[][] next_soil_health = NextTreeSoilHealth(data_store, tree, eatMode);
+                //        ApplyAreaHealth(data_store, tree.Tile, next_soil_health);
+                //    }
+                //}
+                if (t is FruitTree fruitTree)
                 {
-                    if (IsTreeEating(tree, check_days))  // Should find a way to not be calculating this twice.
+                    EatMode fruit_tree_current_eat_mode = GetFruitTreeEatMode(fruitTree, check_days);
+                    if (fruit_tree_current_eat_mode == eatMode || fruit_tree_current_eat_mode == EatMode.All && fruit_tree_current_eat_mode != EatMode.None)
                     {
-                        int[][] next_soil_health = NextTreeSoilHealth(data_store, tree, eatMode);
-                        ApplyAreaHealth(data_store, tree.Tile, next_soil_health);
-                    }
-                }
-                else if (t is FruitTree fruitTree)
-                {
-                    if (IsFruitTreeEating(fruitTree, check_days))
-                    {// Ensure is in season or not fully grown.
                         int[][] next_soil_health = NextTreeSoilHealth(data_store, fruitTree, eatMode);
                         ApplyAreaHealth(data_store, fruitTree.Tile, next_soil_health);
                     }
                 }
                 else if (t is Bush bush)
                 {
-                    if (IsBushEating(bush, check_days))
+                    EatMode bush_current_eat_mode = GetBushEatMode(bush, check_days);
+                    if (bush_current_eat_mode == eatMode || bush_current_eat_mode == EatMode.All && bush_current_eat_mode != EatMode.None)
                     {
                         int[][] next_soil_health = NextBushSoilHealth(data_store, bush, eatMode);
                         ApplyAreaHealth(data_store, bush.Tile, next_soil_health);
@@ -409,8 +453,8 @@ namespace RegenerativeAgriculture
                 else if (t is HoeDirt hoeDirt)
                 {
                     // Check if crop is actually doing the type of eating we're trying to do.
-                    EatMode crop_current_eat_mode = IsCropEating(hoeDirt, check_days);
-                    if (crop_current_eat_mode == eatMode || crop_current_eat_mode == EatMode.All)
+                    EatMode crop_current_eat_mode = GetCropEatMode(hoeDirt, check_days);
+                    if (crop_current_eat_mode == eatMode || crop_current_eat_mode == EatMode.All && crop_current_eat_mode != EatMode.None)
                     {
                         int[] next_soil_health = NextCropSoilHealth(data_store, hoeDirt, eatMode);
                         data_store[hoeDirt.Tile] = next_soil_health;
@@ -488,14 +532,14 @@ namespace RegenerativeAgriculture
         {
             int radius = 2;
             int[] tree_diet;
-            if (t is Tree tree)
-            {
-                tree_diet = GetCropDiet(tree.GetData().SeedItemId); // Already Qualified ID
+            //if (t is Tree tree)
+            //{
+            //    tree_diet = GetCropDiet(tree.GetData().SeedItemId); // Already Qualified ID
 
-                // Tree eats (or gives)
+            //    // Tree eats (or gives)
 
-            }
-            else if (t is FruitTree fruit_tree)
+            //}
+            if (t is FruitTree fruit_tree)
             {
                 tree_diet = GetCropDiet($"(O){fruit_tree.treeId.Value}"); // Convert to Qualified ID
             }

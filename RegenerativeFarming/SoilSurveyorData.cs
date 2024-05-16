@@ -12,5 +12,9 @@ namespace RegenerativeAgriculture
         public string Description { get; set; }
         public string Texture { get; set; } = "Juicyslew.RegenerativeAgriculture/soil_surveyor_placeholder.png";
         public int TextureIndex { get; set; } = 5;
+
+        //public string? ConventionalUpgradeFrom { get; set; } = null;
+
+        public int UpgradeLevel { get; set; } = 0;
     }
 }
