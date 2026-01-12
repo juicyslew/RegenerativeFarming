@@ -3,6 +3,6 @@ This is a stardew valley mod that adds soil health metrics to the game.  Differe
 
 This mod is compatible with Cornucopia and Ridgeside Village.  For more details, see the links below!
 
-[Here is the readme within the project folder](https://github.com/juicyslew/RegenerativeFarming/blob/master/RegenerativeFarming/README.md)
+[Detailed README within the project folder](https://github.com/juicyslew/RegenerativeFarming/blob/master/RegenerativeFarming/README.md)
 
-[Here is the original proposal](https://github.com/StardewModders/mod-ideas/issues/1233#issue-2264498472)
+[Original Proposal](https://github.com/StardewModders/mod-ideas/issues/1233#issue-2264498472)
